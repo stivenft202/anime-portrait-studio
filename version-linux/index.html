@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Anime Half Portrait Studio — versión independiente</title>
+<style>
+  body { margin:0; background:#23272e; color:#e8e8e8; font-family:system-ui, sans-serif; display:flex; gap:16px; padding:16px; box-sizing:border-box; }
+  #lienzo { background:#2c3038; height:92vh; aspect-ratio:3/4; }
+  #panel { width:340px; }
+  h1 { font-size:19px; margin:0 0 12px; }
+  .fila { display:flex; align-items:center; gap:8px; margin:7px 0; }
+  .fila span.etq { width:104px; font-size:12px; letter-spacing:.06em; color:#aeb6c2; }
+  .fila b { flex:1; text-align:center; font-weight:600; font-size:14px; }
+  button { background:#39404d; color:#fff; border:0; border-radius:4px; padding:7px 12px; cursor:pointer; font-size:14px; }
+  button:hover { background:#475061; }
+  button.ancho { width:100%; margin:5px 0; padding:10px; }
+  .sexo { display:flex; gap:8px; margin-bottom:10px; }
+  .sexo button { flex:1; }
+  .sexo button.activo { background:#8a6d2f; }
+  #codigo { color:#f2c14e; font-family:monospace; margin-top:10px; font-size:14px; }
+  #estado { color:#9fb4c8; font-size:13px; min-height:18px; }
+</style>
+</head>
+<body>
+<canvas id="lienzo" width="1200" height="1600"></canvas>
+<div id="panel">
+  <h1>PORTRAIT CREATOR</h1>
+  <div class="sexo">
+    <button id="btnF">Female</button><button id="btnM">Male</button>
+  </div>
+  <div id="filas"></div>
+  <button class="ancho" id="btnAzar">Randomize</button>
+  <button class="ancho" id="btnExportar">Export PNG</button>
+  <button class="ancho" id="btnCara">Export Face PNG</button>
+  <button class="ancho" id="btnGuardar">Save Recipe</button>
+  <button class="ancho" id="btnCargar">Load Recipe</button>
+  <input type="file" id="archivoReceta" accept=".json" style="display:none">
+  <div id="codigo"></div>
+  <div id="estado">Cargando capas…</div>
+</div>
+<script>
+const PELOS = { Female:["Long Straight","Pixie Cut","Bob Cut","Long Wavy","Twin Tails","High Ponytail","Long Braid","Double Buns","Hime Cut","Messy Bun","Side Ponytail","Long Curly"], Male:["Style 1","Style 2","Style 3","Style 4"] };
+const ROPAS = { Female:["Sweater and Jacket","Green Jacket","Blue Hoodie"], Male:["Outfit 1","Outfit 2","Outfit 3"] };
+const OJOS = ["Neutral","Happy","Sad","Angry","Surprised"];
+const NARICES = ["Nose 1","Nose 2","Nose 3"];
+const VELLO = ["None","Mustache","Stubble","Full Beard"];
+const BOCAS = { Female:["Neutral","Happy","Sad","Angry","Surprised"], Male:["Neutral","Happy","Surprised"] };
+const ARCH = { pelo:i=>`Hair${i+1}`, ropa:i=>`Outfit${i+1}`, ojos:i=>["Eyes_Neutral","Eyes_Happy","Eyes_Sad","Eyes_Angry","Eyes_Surprised"][i],
+               nariz:i=>`Nose${i+1}`, boca:(i,s)=>({Female:["Mouth_Neutral","Mouth_Happy","Mouth_Sad","Mouth_Angry","Mouth_Surprised"],Male:["Mouth_Neutral","Mouth_Happy","Mouth_Surprised"]}[s][i]) };
+const COL_PELO = [["Natural Black",[.16,.15,.18]],["Dark Brown",[.36,.24,.17]],["Chestnut",[.55,.32,.18]],["Ash Blonde",[.85,.75,.55]],["Silver",[.82,.84,.88]],["Wine Red",[.55,.16,.20]],["Jet Black",[.08,.08,.10]],["Chocolate",[.42,.26,.16]],["Auburn",[.60,.28,.16]],["Copper",[.78,.42,.20]],["Burgundy",[.42,.12,.18]],["Crimson",[.72,.18,.18]],["Rose Pink",[.85,.45,.50]],["Golden Blonde",[.92,.78,.42]],["Honey",[.80,.60,.32]],["Platinum",[.95,.93,.88]],["Ash Gray",[.55,.56,.60]],["Navy Blue",[.16,.24,.48]],["Steel Blue",[.35,.48,.68]],["Teal",[.14,.42,.42]],["Forest Green",[.20,.38,.22]],["Mint",[.55,.80,.62]],["Plum",[.42,.22,.48]],["Lavender",[.62,.52,.78]]];
+const PIEL = [["Light",[1,1,1]],["Warm",[.96,.85,.74]],["Tan",[.85,.66,.50]],["Deep",[.62,.45,.33]]];
+const COL_ROPA = [["White",[1,1,1]],["Sand",[.92,.84,.70]],["Olive",[.62,.66,.48]],["Sky",[.62,.76,.92]],["Rose",[.94,.70,.72]],["Charcoal",[.35,.35,.38]],["Black",[.15,.15,.16]],["Gray",[.60,.60,.62]],["Navy",[.20,.28,.52]],["Royal Blue",[.30,.42,.85]],["Denim",[.42,.55,.72]],["Mint",[.62,.85,.70]],["Forest",[.30,.48,.32]],["Lime",[.72,.85,.45]],["Yellow",[.95,.85,.40]],["Orange",[.92,.58,.30]],["Coral",[.92,.55,.48]],["Red",[.78,.25,.25]],["Burgundy",[.50,.20,.26]],["Pink",[.95,.65,.78]],["Lavender",[.72,.65,.88]],["Purple",[.52,.38,.72]],["Brown",[.48,.36,.26]],["Camel",[.78,.62,.42]]];
+const COL_OJOS = [["Original Green",null],["Brown",[110,68,40]],["Blue",[58,105,185]],["Amber",[185,128,48]],["Violet",[128,92,185]],["Gray",[128,132,138]],["Red",[175,42,38]]];
+
+let R = { sexo:"Female", pelo:0, ropa:0, ojos:0, nariz:0, boca:0, color_pelo:0, piel:0, color_ropa:0, color_ojos:0, vello:0 };
+let contador = 0, imgs = {};
+
+function cargar(nombre){ return new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.src=nombre; }); }
+async function precargar(){
+  for (const sexo of ["Female","Male"]){
+    const lista = ["Base","Nose1","Nose2","Nose3","Eyes_Neutral","Eyes_Happy","Eyes_Sad","Eyes_Angry","Eyes_Surprised",
+      "Mouth_Neutral","Mouth_Happy","Mouth_Surprised","Outfit1","Outfit2","Outfit3",
+      "Hair1_Back","Hair1_Front","Hair2_Back","Hair2_Front","Hair3_Back","Hair3_Front","Hair4_Back","Hair4_Front"];
+    if (sexo==="Male") lista.push("FacialHair1","FacialHair2","FacialHair3");
+    if (sexo==="Female") lista.push("Hair5_Back","Hair5_Front","Hair6_Back","Hair6_Front","Hair7_Back","Hair7_Front","Hair8_Back","Hair8_Front","Hair9_Back","Hair9_Front","Hair10_Back","Hair10_Front","Hair11_Back","Hair11_Front","Hair12_Back","Hair12_Front");
+    if (sexo==="Female") lista.push("Mouth_Sad","Mouth_Angry");
+    for (const n of lista) imgs[sexo+"/"+n] = await cargar(`assets/${sexo}/${n}.png`);
+  }
+  document.getElementById("estado").textContent = "";
+  dibujar();
+}
+function teñida(img, tinte){
+  const c = document.createElement("canvas"); c.width=1200; c.height=1600;
+  const x = c.getContext("2d"); x.drawImage(img,0,0);
+  if (tinte){ x.globalCompositeOperation="multiply";
+    x.fillStyle=`rgb(${tinte.map(v=>Math.round(v*255)).join(",")})`; x.fillRect(0,0,1200,1600);
+    x.globalCompositeOperation="destination-in"; x.drawImage(img,0,0); }
+  return c;
+}
+const _ojosCache = {};
+function ojosTeñidos(clave){
+  const idx = R.color_ojos, img = imgs[clave];
+  if (!idx || !img) return img;
+  const ck = clave+"|"+idx;
+  if (_ojosCache[ck]) return _ojosCache[ck];
+  const c = document.createElement("canvas"); c.width=1200; c.height=1600;
+  const x = c.getContext("2d"); x.drawImage(img,0,0);
+  const id = x.getImageData(0,0,1200,1600), d = id.data;
+  let sr=0, sg=0, sb=0, n=0;
+  const esIris = (i)=>{ const r=d[i], g=d[i+1], b=d[i+2];
+    if (d[i+3]<=100) return false;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), df=mx-mn;
+    if (df<=12 || mx>=200) return false;
+    let h; if (mx===r) h=((g-b)/df*60+360)%360; else if (mx===g) h=(b-r)/df*60+120; else h=(r-g)/df*60+240;
+    return h>=85 && h<=205; };
+  for (let i=0;i<d.length;i+=4) if (esIris(i)){ sr+=d[i]; sg+=d[i+1]; sb+=d[i+2]; n++; }
+  if (n){ const dest = COL_OJOS[idx][1], er=dest[0]/(sr/n), eg=dest[1]/(sg/n), eb=dest[2]/(sb/n);
+    for (let i=0;i<d.length;i+=4) if (esIris(i)){ d[i]=Math.min(255,d[i]*er); d[i+1]=Math.min(255,d[i+1]*eg); d[i+2]=Math.min(255,d[i+2]*eb); } }
+  x.putImageData(id,0,0);
+  _ojosCache[ck]=c; return c;
+}
+function componer(dest){
+  const x = dest.getContext("2d"); x.clearRect(0,0,1200,1600);
+  const S = R.sexo, piel = PIEL[R.piel][1], cp = COL_PELO[R.color_pelo][1], cr = COL_ROPA[R.color_ropa][1];
+  const pelo = ARCH.pelo(R.pelo);
+  x.drawImage(teñida(imgs[S+"/"+pelo+"_Back"], cp),0,0);
+  x.drawImage(teñida(imgs[S+"/Base"], piel),0,0);
+  x.drawImage(teñida(imgs[S+"/"+ARCH.ropa(R.ropa)], cr),0,0);
+  x.drawImage(teñida(imgs[S+"/"+ARCH.nariz(R.nariz)], piel),0,0);   // la nariz sigue la piel
+  x.drawImage(ojosTeñidos(S+"/"+ARCH.ojos(R.ojos)),0,0);
+  x.drawImage(imgs[S+"/"+ARCH.boca(R.boca,S)],0,0);
+  if (S==="Male" && R.vello>0) x.drawImage(teñida(imgs[S+"/FacialHair"+R.vello], cp),0,0);
+  x.drawImage(teñida(imgs[S+"/"+pelo+"_Front"], cp),0,0);
+}
+function codigo(){
+  const s = R.sexo==="Female"?"F":"M";
+  return `${s} H${R.pelo+1} O${R.ropa+1} E${R.ojos+1} N${R.nariz+1} M${R.boca+1} | HC${R.color_pelo+1} ST${R.piel+1} OC${R.color_ropa+1} EC${R.color_ojos+1}` + (s==="M" ? ` FH${R.vello}` : "");
+}
+const FILAS = [
+  ["HAIR","pelo",()=>PELOS[R.sexo]], ["OUTFIT","ropa",()=>ROPAS[R.sexo]], ["EYES","ojos",()=>OJOS], ["EYE COLOR","color_ojos",()=>COL_OJOS.map(c=>c[0])],
+  ["NOSE","nariz",()=>NARICES], ["MOUTH","boca",()=>BOCAS[R.sexo]], ["FACIAL HAIR","vello",()=>R.sexo==="Male"?VELLO:["—"]],
+  ["HAIR COLOR","color_pelo",()=>COL_PELO.map(c=>c[0])], ["SKIN TONE","piel",()=>PIEL.map(c=>c[0])],
+  ["OUTFIT COLOR","color_ropa",()=>COL_ROPA.map(c=>c[0])] ];
+const COLOR_FILAS = { color_pelo: COL_PELO, piel: PIEL, color_ropa: COL_ROPA, color_ojos: COL_OJOS };
+function construirFilas(){
+  const cont = document.getElementById("filas"); cont.innerHTML="";
+  for (const [etq, clave, lista] of FILAS){
+    const d = document.createElement("div"); d.className="fila";
+    d.innerHTML = `<span class="etq">${etq}</span><button data-k="${clave}" data-d="-1">&lt;</button><b id="v_${clave}"></b><button data-k="${clave}" data-d="1">&gt;</button>`;
+    cont.appendChild(d);
+    if (COLOR_FILAS[clave]){
+      const m = document.createElement("div");
+      m.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 8px 8px;";
+      COLOR_FILAS[clave].forEach((c,i)=>{
+        const b = document.createElement("button");
+        const rgb = clave==="color_ojos" ? (c[1]||[95,165,115]) : c[1].map(v=>Math.round(v*255));
+        b.style.cssText = `width:22px;height:22px;border-radius:4px;cursor:pointer;background:rgb(${rgb[0]},${rgb[1]},${rgb[2]});border:2px solid ${R[clave]===i?"#ffd65a":"rgba(255,255,255,.25)"}`;
+        b.title = c[0];
+        b.onclick = ()=>{ R[clave]=i; dibujar(); };
+        m.appendChild(b);
+      });
+      cont.appendChild(m);
+    }
+  }
+  cont.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const k=b.dataset.k, n=FILAS.find(f=>f[1]===k)[2]().length;
+    R[k]=(R[k]+parseInt(b.dataset.d)+n)%n; dibujar(); });
+  document.getElementById("btnF").className = R.sexo==="Female"?"activo":"";
+  document.getElementById("btnM").className = R.sexo==="Male"?"activo":"";
+}
+function dibujar(){
+  construirFilas();
+  for (const [,clave,lista] of FILAS) document.getElementById("v_"+clave).textContent = lista()[R[clave]];
+  componer(document.getElementById("lienzo"));
+  document.getElementById("codigo").textContent = (contador?`#${contador}  `:"") + codigo();
+}
+function exportar(cara){
+  const c = document.createElement("canvas"); c.width=1200; c.height=cara?1200:1600;
+  const x = c.getContext("2d");
+  const tmp = document.createElement("canvas"); tmp.width=1200; tmp.height=1600;
+  R_temp = R; componer(tmp);
+  x.drawImage(tmp,0,0);
+  const a = document.createElement("a");
+  a.download = (R.sexo.toLowerCase()) + (cara?"_face.png":"_portrait.png");
+  a.href = c.toDataURL("image/png"); a.click();
+  document.getElementById("estado").textContent = "Exportado: " + a.download;
+}
+document.getElementById("btnF").onclick = ()=>{ R.sexo="Female"; R.boca=Math.min(R.boca,4); dibujar(); };
+document.getElementById("btnM").onclick = ()=>{ R.sexo="Male"; R.boca=Math.min(R.boca,2); dibujar(); };
+document.getElementById("btnAzar").onclick = ()=>{ const r=(n)=>Math.floor(Math.random()*n);
+  R.pelo=r(PELOS[R.sexo].length); R.ropa=r(3); R.ojos=r(5); R.nariz=r(3); R.boca=r(BOCAS[R.sexo].length);
+  R.color_pelo=r(COL_PELO.length); R.piel=r(4); R.color_ropa=r(COL_ROPA.length); R.color_ojos=r(COL_OJOS.length); if(R.sexo==="Male") R.vello=r(4); contador++; dibujar(); };
+document.getElementById("btnExportar").onclick = ()=>exportar(false);
+document.getElementById("btnCara").onclick = ()=>exportar(true);
+document.getElementById("btnGuardar").onclick = ()=>{
+  const a=document.createElement("a");
+  a.download = R.sexo.toLowerCase()+"_recipe.json";
+  a.href = "data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(R,null,2)); a.click(); };
+document.getElementById("btnCargar").onclick = ()=>document.getElementById("archivoReceta").click();
+document.getElementById("archivoReceta").onchange = (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  f.text().then(t=>{ try{ R=Object.assign(R, JSON.parse(t)); dibujar(); }catch(_){} }); };
+precargar();
+</script>
+</body>
+</html>
