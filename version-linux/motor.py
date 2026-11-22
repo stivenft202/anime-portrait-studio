@@ -5,6 +5,7 @@
 import os
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(AQUI, 'assets')
@@ -80,21 +81,44 @@ def _tono(a):
     h[m_b] = 60 * ((r - g)[m_b] / d[m_b]) + 240
     return h, mx * 255.0, d * 255.0
 
-def _ojos_tinte(a, nombre, idx):
+def _ojos_tinte(a, nombre, idx, sexo=''):
     """Recolorea SOLO el iris (verde del arte, tono 85-205) hacia el
-    color destino, conservando sombreado, pupila, esclerótica y brillos."""
+    color destino, conservando sombreado, pupila, esclerótica y brillos.
+    Stage20 fix D (disco ámbar): la mitad inferior del iris trae en el arte
+    un tono cálido (20-70) que la máscara verde no cubría, así que quedaba
+    ámbar con cualquier color pedido. Ese disco se tiñe con su propia escala
+    (destino / media del disco) para que el iris quede de un solo color.
+    El borde inferior del iris (grisáceo, casi sin saturación) tampoco
+    entraba en la máscara verde: se añade como "rim" (mitad inferior del
+    iris dilatado, tonos medios 75-220) con la misma escala del disco.
+    La caché es por (sexo, nombre): el arte de ojos de él y de ella es
+    distinto aunque el archivo se llame igual."""
     destino = COLORES_OJOS[idx][1]
     if destino is None:
         return a
-    if nombre not in _iris_cache:
+    clave = (sexo, nombre)
+    if clave not in _iris_cache:
         h, mx, d = _tono(a)
         masc = (a[..., 3] > 100) & (h >= 85) & (h <= 205) & (d > 12) & (mx < 200)
         prom = a[..., :3][masc].mean(axis=0) if masc.any() else np.array([70.0, 100.0, 90.0])
-        _iris_cache[nombre] = (masc, prom)
-    masc, prom = _iris_cache[nombre]
+        calido = (a[..., 3] > 100) & (h >= 20) & (h < 70) & (d > 12) & (mx < 220)
+        disco = calido & ndimage.binary_dilation(masc, iterations=15)
+        prom_disco = a[..., :3][disco].mean(axis=0) if disco.any() else None
+        iris = masc | disco
+        ys_v, _ = np.where(masc)
+        ycent = ys_v.mean() if len(ys_v) else 1600
+        yy, _xx = np.mgrid[0:1600, 0:1200]
+        rim = (ndimage.binary_dilation(iris, iterations=6)
+               & (a[..., 3] > 100) & (mx >= 75) & (mx < 220) & ~iris & (yy > ycent))
+        _iris_cache[clave] = (masc, prom, disco, prom_disco, rim)
+    masc, prom, disco, prom_disco, rim = _iris_cache[clave]
     o = a.copy()
     escala = np.array(destino, float) / np.maximum(prom, 1.0)
     o[..., :3] = np.where(masc[..., None], np.clip(o[..., :3] * escala, 0, 255), o[..., :3])
+    if disco is not None and prom_disco is not None:
+        escala_d = np.array(destino, float) / np.maximum(prom_disco, 1.0)
+        o[..., :3] = np.where(disco[..., None], np.clip(o[..., :3] * escala_d, 0, 255), o[..., :3])
+        o[..., :3] = np.where(rim[..., None], np.clip(o[..., :3] * escala_d, 0, 255), o[..., :3])
     return o
 
 def _sobre(fondo, a):
@@ -114,7 +138,7 @@ def render(receta, fondo=(40, 44, 52)):
     comp = _sobre(comp, _tinte(capa(sexo, ROPAS[sexo][receta['ropa']][1]), COLORES_ROPA[receta['color_ropa']][1]))
     comp = _sobre(comp, _tinte(capa(sexo, NARICES[receta['nariz']][1]), piel))  # la nariz sigue la piel
     ojos_arch = OJOS[receta['ojos']][1]
-    comp = _sobre(comp, _ojos_tinte(capa(sexo, ojos_arch), ojos_arch, receta.get('color_ojos', 0)))
+    comp = _sobre(comp, _ojos_tinte(capa(sexo, ojos_arch), ojos_arch, receta.get('color_ojos', 0), sexo))
     comp = _sobre(comp, capa(sexo, BOCAS[sexo][receta['boca']][1]))
     if sexo == 'Male' and receta.get('vello', 0) > 0:
         comp = _sobre(comp, _tinte(capa(sexo, VELLO[receta['vello']][1]), COLORES_PELO[receta['color_pelo']][1]))
@@ -141,7 +165,7 @@ def guardar_png(receta, ruta, cara=False):
         _tinte(capa(sexo, 'Base'), piel),
         _tinte(capa(sexo, ROPAS[sexo][receta['ropa']][1]), COLORES_ROPA[receta['color_ropa']][1]),
         _tinte(capa(sexo, NARICES[receta['nariz']][1]), piel),
-        _ojos_tinte(capa(sexo, OJOS[receta['ojos']][1]), OJOS[receta['ojos']][1], receta.get('color_ojos', 0)),
+        _ojos_tinte(capa(sexo, OJOS[receta['ojos']][1]), OJOS[receta['ojos']][1], receta.get('color_ojos', 0), sexo),
         capa(sexo, BOCAS[sexo][receta['boca']][1]),
         _tinte(capa(sexo, VELLO[receta['vello']][1]), COLORES_PELO[receta['color_pelo']][1]) if sexo == 'Male' and receta.get('vello', 0) > 0 else np.zeros((1600, 1200, 4)),
         _tinte(capa(sexo, pelo + '_Front'), COLORES_PELO[receta['color_pelo']][1]),

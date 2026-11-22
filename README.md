@@ -26,11 +26,14 @@ Requirements: Python 3, Pillow, numpy, scipy
   the full tester (`probar_todo.py`), the sample sheet (`hoja_muestras.py`)
   and the art layers in `assets/Female` (41 PNG) and `assets/Male` (26 PNG).
 - `herramientas/` — production tools: layer extraction, the piece gate
-  (`probar_todo.py`/`producir_pieza.py`), audits and the stage19 fixes.
+  (`probar_todo.py`/`producir_pieza.py`), audits and the stage19/stage20 fixes.
 - `docs/` — production standard and product specification.
+- `unity/EyesColor/` — the 60 baked eye-color variants, re-baked in stage20
+  with the amber-disc fix (see `VERSIONES.md`). For the Unity package in
+  Google Drive, applied only on request.
 - `VERSIONES.md` — changelog (Spanish).
 
-## Catalog (stage19)
+## Catalog (stage20)
 
 - Female: 12 hairstyles, 3 outfits, 5 eyes, 3 noses, 5 mouths
   = 2,700 piece combinations.
@@ -43,6 +46,8 @@ Requirements: Python 3, Pillow, numpy, scipy
 
 ## Version
 
-Current: **stage19** (22 November 2026) + eye-tint fix in
-`motor.guardar_png()` (the PNG export now applies the eye color, same as
-the on-screen render). See `VERSIONES.md`.
+Current: **stage20** (22 November 2026) — full sweep of the 4,860 combos
+and fix of the errors reported from Unity: face fragments baked into the
+hair fronts removed (57 components), cracks filled in the Full Beard,
+amber disc + rim of the iris now tinted (eye color is a single color),
+60 eye-color variants re-baked. See `VERSIONES.md`.
