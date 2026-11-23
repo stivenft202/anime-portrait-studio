@@ -75,12 +75,22 @@
   del ojo y la mandíbula, que el detector marca como falsa alarma (§11). NO es
   regresión del arte: ninguna receta dejó de estar marcada y las 134 nuevas son
   H2/H10 (los frentes con fragmentos quitados).
-- Regla nueva de Stiven 2026-11-22 ~18:21: «de ahora en adelante sube todo tambien
-  siempre a drive para unity» — cada update va a GitHub Y a Drive/Unity siempre
-  (reemplaza la regla anterior de «solo por orden expresa»).
+- SUBIDO 2026-11-22 ~18:35 por orden de Stiven («subelo ya», regla nueva: siempre
+  GitHub + Drive/Unity): GitHub commit `94b6efc0` (151 archivos, verificado
+  151/151 hashes, motor.py y PortraitCreator.cs confirmados en raw.githubuser
+  content.com); Drive/Unity 86 archivos por ID y verificados por md5 86/86
+  (60 variantes EyesColor, 18 capas de pelo de ella, 7 de él incl. FacialHair3,
+  PortraitCreator.cs), sin tocar ningún .meta. Unity/Drive = stage20.
 - Barrido visual en el navegador: el navegador en la nube NO puede abrir
-  http://127.0.0.1:8765/ (rechaza direcciones locales, loopback). La verificación
-  visual por esa vía falló; pendiente investigar Playwright MCP (orden de Stiven).
+  http://127.0.0.1:8765/ (rechaza direcciones locales, loopback). Se hizo con
+  Playwright Python en el Chromium local (`herramientas/barrido_navegador.py`,
+  2026-11-22 ~18:32): 11/11 checks con el código correcto, revisados visualmente
+  en `diagnostico_usuario/barrido_navegador/` — #31 sin franja dorada ni trazos
+  azules, H6/H11 Silver limpios, H12→H4 con clic real (pelo presente, no calvo),
+  #17 con ojos Brown uniformes y barba incipiente, Angry Violet/Red con iris de
+  un solo color (disco verificado numéricamente: navegador = motor ±2,5 RGB),
+  Randomize x3 válido, Full Beard sin la curva clara. SIN defectos nuevos. La
+  boca Sorprendido sigue siendo el óvalo rojo por decisión de Stiven.
 
 ## 2026-11-22 — Fix tinte de ojos en guardar_png (motor.py)
 - Snapshot previo: `versiones/2026-11-22_antes-fix-ojos-guardar_png/motor.py` (md5 f07367b7205fb598099a10b7a303e4bd).
@@ -115,3 +125,542 @@
 - Repo https://github.com/stivenft202/anime-portrait-studio, commit ee7ae9ab.
 - Contenido: stage19 Linux completo (86 archivos, 75 MB).
 - Verificado: 86/86 hashes de blob iguales a los locales; motor.py en GitHub lleva el fix de ojos.
+
+## 2026-11-22 — Tanda 0 del barrido completo (capas)
+- Barrido con Playwright MCP (stdio, JSON-RPC): 144 renders en el navegador
+  (67 capas aisladas + 67 canónicas + 10 auxiliares de disco), 1200×1600.
+- Detectores: fragmentos en cara, azules en pelo crudo, grietas en FH3,
+  disco ámbar del iris, trazos sueltos. 14 sospechosos → revisados con zoom.
+- **3 defectos reales corregidos (331 px):**
+  1. Male/Hair2_Front: cuadrado marrón 80 px (x301-311, y512-524) + mota
+     25 px (x317-324, y534-539) junto al ojo lejano — borrados.
+  2. Female/Hair6_Front: mota oscura 33 px (x610-614, y869-876) en la
+     mejilla — borrada.
+  3. Male/FacialHair3: rendija blanca en diagonal 91+45 px (x614-704,
+     y689-733) + 5 microagujeros de 9-21 px — rellenados con mediana local.
+- Confirmado limpio: azules en pelo crudo 0 px; fragmentos stage20 0
+  reaparecidos; grietas stage20 en FH3 0 reaparecidas; disco ámbar limpio
+  (racimo mayor 11 px, borde); 113 falsas alarmas §11 etiquetadas; 11
+  sospechosos descartados (pelo legítimo / textura de barba).
+- NO se tocó el hueco de 514 px entre bigote y barba (x304-456, y737-798):
+  es intencional (documentado en stage20_fix_barba.py).
+- Scripts: herramientas/tanda0_fix.py (con asserts, 0 px fuera de zona),
+  herramientas/tanda0_verificar.py. Snapshot previo en
+  versiones/2026-11-22_tanda0-antes-fixes/. Verificación visual post-fix
+  (3 zooms + 2 planchas canónicas) OK.
+- Reporte: diagnostico_usuario/barrido_tanda0/ (reporte.json, renders,
+  planchas, revision/, verificacion/).
+- PENDIENTE: subir a GitHub + Drive/Unity cuando Stiven lo ordene.
+
+## 2026-11-22 — Tanda 1 del barrido completo (mujeres, pelo 1)
+- 225 renders en el navegador MCP (F, Hair1 Long Straight; ropa 0-2 ×
+  ojos 0-4 × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600, ~1 s
+  por combo (203 s en total).
+- Detectores: lunares/trazos en cara, azules en pelo, disco del iris,
+  trazos sueltos, integridad (ojos/bocas presentes).
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" se explican por 3 causas sistemáticas, no errores:
+  - D2 azules: bug del detector (la capucha azul O3 se contaba como pelo);
+    corregida la máscara por ropa y re-medido: 0 px en los 225. El detector
+    ya quedó corregido en detectar_tanda1.py para las tandas siguientes.
+  - D3 disco: el frente del pelo tapa 53 px de la esquina interior del
+    iris y parte el racimo al medirlo; el disco ámbar está intacto y el
+    iris se ve uniforme (verificado con zoom E1/E2/E4).
+  - D4 trazos: 26 componentes, todos arte del dibujo (líneas de la oreja,
+    sombra de mandíbula ya anotada, esquina de la boca, pliegues de ropa).
+- Confirmado limpio: lunares reales 0; azules en pelo 0 px; disco intacto
+  en los 5 ojos; ojos y bocas presentes y completos en los 225; ningún
+  render en blanco. 225 falsas alarmas §11 (1 por combo).
+- Nota de método: en las tandas siguientes el D3 debe comparar contra el
+  valor esperado con el pelo puesto (no contra el crudo) y el D4 debe
+  excluir la oreja y limitarse a y<900.
+- Reporte: diagnostico_usuario/barrido_tanda1/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 2 del barrido completo (mujeres, pelo 2)
+- 225 renders en el navegador MCP (F, Hair2 Pixie Cut; ropa 0-2 × ojos 0-4
+  × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600, ~1 s por combo
+  (200 s en total).
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 8 componentes
+  distintos, todos arte del dibujo (sombra de la esquina de la boca,
+  borde inferior de la boca M1, líneas de la mandíbula/mentón, borde de
+  la capucha O3), verificados con zoom. D1, D2, D3 y D5 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (450 falsas alarmas §11); azules en
+  pelo 0 px; disco ámbar intacto (racimo cálido 62 px, igual al crudo 61 px:
+  el Pixie Cut es corto y NO tapa la esquina del iris; iris uniforme
+  verificado a ojo en E1 y E5); ojos y bocas presentes en los 225.
+- Nota de método: la calibración D3 por ojo con el pelo puesto funcionó
+  (desviación 0,0); el D4 con oreja excluida y y<900 deja solo 8
+  componentes sistemáticos de arte, descartables por bbox.
+- Reporte: diagnostico_usuario/barrido_tanda2/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 3 del barrido completo (mujeres, pelo 3)
+- 225 renders en el navegador MCP (F, Hair3 Bob Cut; ropa 0-2 × ojos 0-4
+  × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 8 componentes
+  distintos, todos arte del dibujo (sombra de la esquina de la boca,
+  líneas de la mandíbula/mentón, mota de sombra de la mandíbula ya anotada,
+  y uno NUEVO respecto a la tanda 2: línea y sombra de la mandíbula junto
+  a la oreja, x688-722, y727-777, 201 px — el Bob Cut deja ver esa unión;
+  verificado con zoom: es la línea de la mandíbula y su sombra, arte
+  legítimo). D1, D2, D3 y D5 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (450 falsas alarmas §11); azules en
+  pelo 0 px; disco ámbar intacto (racimo cálido por ojo con este pelo: 36
+  px, E3 39, desviación 0,0; el Bob Cut tapa parte de la esquina interior
+  del iris, como el pelo 1; iris uniforme verificado a ojo en E1 y E5);
+  ojos y bocas presentes en los 225.
+- Reporte: diagnostico_usuario/barrido_tanda3/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 4 del barrido completo (mujeres, pelo 4)
+- 225 renders en el navegador MCP (F, Hair4 Long Wavy; ropa 0-2 × ojos 0-4
+  × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600, ~1 s por combo
+  (163 s en total). Nota: servidor.py estaba caído al empezar la tanda y
+  se relanzó con nohup (responde 200).
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 6 componentes
+  distintos, todos arte ya conocido de las tandas 1-3, NINGUNO nuevo
+  (mota de sombra de la mandíbula, línea y sombra junto a la oreja, sombra
+  de la esquina de la boca, líneas de la mandíbula/mentón, borde inferior
+  de la boca M1). D1, D2, D3 y D5 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (450 falsas alarmas §11); azules en
+  pelo 0 px; disco ámbar intacto (racimo cálido por ojo con este pelo:
+  mediana 55 px, mín. 51, máx. 55; el Long Wavy tapa parte de la esquina
+  interior del iris, como los pelos 1 y 3; iris uniforme verificado a ojo
+  en E1 y E5); ojos y bocas presentes en los 225.
+- Reporte: diagnostico_usuario/barrido_tanda4/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 5 del barrido completo (mujeres, pelo 5)
+- 225 renders en el navegador MCP (F, Hair5, pelo largo con mechones
+  laterales que caen por delante de los hombros; ropa 0-2 × ojos 0-4
+  × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600, ~1 s por combo
+  (163 s en total).
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 5 componentes
+  distintos, todos arte del dibujo. Uno NUEVO como componente aparte:
+  línea vertical mandíbula-cuello (x721-737, y733-768, 53 px) — es arte
+  de la capa Base (el borde delantero de la mandíbula que baja al cuello);
+  verificado: la línea está en la Base sola, NO en Hair5_Front, y en la
+  tanda 4 el mismo punto estaba tapado por el pelo 4. Descartable por bbox
+  en tandas siguientes. Los 3 componentes conocidos que no salen (línea de
+  la mandíbula/mentón, mota de sombra, borde inferior de la mandíbula)
+  siguen ahí, pero los mechones del pelo 5 los parten por debajo del
+  umbral de 50 px (verificado numéricamente).
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11, 1 por
+  combo: borde inferior del ojo; la de la mandíbula ya no sale porque el
+  pelo 5 tapa esa zona); azules en pelo 0 px; disco ámbar intacto (racimo
+  cálido por ojo con este pelo: E1 29, E2 29, E3 39, E4 29, E5 33, desv.
+  máx. 2,0; el pelo 5 tapa parte de la esquina interior del iris; iris
+  uniforme verificado a ojo en E1 y E5); ojos y bocas presentes en los 225.
+- Reporte: diagnostico_usuario/barrido_tanda5/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 6 del barrido completo (mujeres, pelo 6)
+- 225 renders en el navegador MCP (F, Hair6 coleta alta, pelo largo
+  recogido arriba con mechones sueltos enmarcando la cara; ropa 0-2
+  × ojos 0-4 × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600,
+  ~1 s por combo (167 s en total). Servidor.py respondía 200 al empezar;
+  no hizo falta relanzarlo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 6 componentes
+  distintos, todos arte del dibujo (mota de sombra de la mandíbula, línea
+  vertical mandíbula-cuello, línea y sombra junto a la oreja, sombra de la
+  esquina de la boca, borde derecho de la mandíbula/cuello — contorno del
+  cuello, verificado con zoom —, borde de cuello de la capucha O3). D1, D2,
+  D3 y D5 no marcaron nada.
+- VERIFICACIÓN DEL ARREGLO DE LA TANDA 0: la mancha oscura de 33 px
+  borrada de Female/Hair6_Front (x610-614, y869-876) **sigue borrada**:
+  0 px opacos en esa zona de la capa (alfa máx. 30, media 2,2), 0
+  componentes D1/D4 cerca en los 225 renders, y el recorte con zoom 4x
+  de la zona en el render se ve limpio (piel, sombra de la mandíbula y un
+  mechón de la coleta, sin mancha). Verificado también por mí a ojo.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11, 1 por
+  combo: borde inferior del ojo); azules en pelo 0 px; disco ámbar
+  intacto (racimo cálido por ojo con este pelo: E1 37, E2 37, E3 39, E4 37,
+  E5 37, desviación 0,0; la coleta tapa parte de la esquina interior del
+  iris; iris uniforme verificado a ojo en E1); ojos y bocas presentes en
+  los 225.
+- Reporte: diagnostico_usuario/barrido_tanda6/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 7 del barrido completo (mujeres, pelo 7)
+- 225 renders en el navegador MCP (F, Hair7 Long Braid, trenza larga;
+  ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-4; colores por defecto),
+  1200×1600, ~1 s por combo (165 s en total). Servidor.py respondía 200
+  al empezar; no hizo falta relanzarlo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 5 componentes
+  distintos, todos arte ya conocido, NINGUNO nuevo (mota de sombra de la
+  mandíbula, línea y sombra junto a la oreja, sombra de la esquina de la
+  boca, borde inferior de la mandíbula, borde de cuello de la capucha O3).
+  La línea vertical mandíbula-cuello y el borde derecho de la mandíbula
+  no aparecen como componentes aparte porque la trenza tapa esas zonas.
+  D1, D2, D3 y D5 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11, 1 por
+  combo: borde inferior del ojo); azules en pelo 0 px; disco ámbar
+  intacto (racimo cálido por ojo con este pelo: E1 27, E2 14, E3 39, E4 20,
+  E5 33, desviación 0,0; E2 es el valor más bajo hasta ahora porque la
+  trenza tapa más de su esquina interior; iris uniforme verificado a ojo
+  en E1 y E5); ojos y bocas presentes en los 225.
+- Reporte: diagnostico_usuario/barrido_tanda7/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 8 del barrido completo (mujeres, pelo 8)
+- 225 renders en el navegador MCP (F, Hair8 moño alto, pelo recogido
+  arriba con mechones sueltos enmarcando la cara; ropa 0-2 × ojos 0-4
+  × nariz 0-2 × boca 0-4; colores por defecto), 1200×1600, ~1 s por combo
+  (166 s en total). Servidor.py respondía 200 al empezar; no hizo falta
+  relanzarlo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- CONTROLES AMPLIADOS (orden de Stiven 2026-11-22 ~21:47: revisar
+  también cualquier otro tipo de error, no solo los que él indicó):
+  D6 calvas/pelo movido y D7 manchas/trazos raros en TODO el retrato,
+  y revisión visual de LAS 9 planchas completas (antes solo 2).
+- Los 225 "sospechosos" eran solo D4 (trazos sueltos): 4 componentes por
+  combo (900 en total), todos arte ya conocido. D1, D2, D3, D5, D6 y D7
+  no marcaron nada.
+- D6: 0 px en los 225. Nota de método: la primera pasada comparó contra
+  el canónico O1 para todas las ropas y marcó 1.706.070 px en 210 renders
+  (FALSO POSITIVO: la ropa tapa el pelo trasero de forma distinta en cada
+  ropa, y los bordes semitransparentes del pelo frontal dejan traslucir
+  los ojos). Corregido a canónico POR ROPA + máscara del pelo sin los
+  bboxes de ojos/nariz/boca (parche_d6_tanda8.py) y recalculado: 0 px.
+  El log detectar.log aún contiene la salida de la primera pasada; el
+  resultado válido es reporte.json tras el parche. D6 debe usar siempre
+  el canónico de la misma ropa.
+- D7: 0 px en los 225 combos.
+- REVISIÓN RETROACTIVA: D6 y D7 pasados sobre los 1.575 renders de las
+  tandas 1-7 (sin re-renderizar, sin modificarlos): 0 sospechosos D6 y
+  0 sospechosos D7 en las 7 tandas. No hay calvas, pelo movido, manchas
+  ni trazos raros escondidos en las tandas 1-7. Resultado en
+  barrido_tanda8/retro_tandas1-7.json.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11); azules
+  en pelo 0 px; disco ámbar intacto (racimo cálido por ojo con este pelo:
+  E1 32, E2 32, E3 39, E4 32, E5 33, desv. máx. 1,0; iris uniforme
+  verificado a ojo en E1 y E5); ojos y bocas presentes en los 225.
+- Reporte: diagnostico_usuario/barrido_tanda8/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 9 del barrido completo (mujeres, pelo 9)
+- 225 renders en el navegador MCP (F, Hair9 Hime Cut, flequillo recto,
+  mechones laterales largos hasta la mandíbula y pelo largo por detrás;
+  ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-4; colores por defecto),
+  1200×1600, ~1 s por combo (164 s en total). Servidor.py respondía 200
+  al empezar; no hizo falta relanzarlo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7, las 9 planchas revisadas visualmente.
+  Los 225 "sospechosos" eran solo D4 (trazos sueltos): 3 componentes
+  distintos (525 px en total), todos arte ya conocido, NINGUNO nuevo
+  (línea vertical mandíbula-cuello, sombra de la esquina de la boca,
+  borde de cuello de la capucha O3). D1, D2, D3, D5, D6 y D7 no
+  marcaron nada.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11); azules
+  en pelo 0 px; disco ámbar intacto (racimo cálido por ojo con este pelo:
+  E1 36, E2 36, E3 39, E4 36, E5 36, desviación 0,0; el Hime Cut tapa
+  parte de la esquina interior del iris, como los pelos 1 y 3; iris
+  uniforme verificado a ojo en E1 y E5); ojos y bocas presentes en los
+  225; calvas/pelo movido (D6) 0 px; manchas/trazos raros en todo el
+  retrato (D7) 0 px.
+- Nota de método: al adaptar los scripts de la tanda 8 con sed, el
+  codigo() usaba 'F H8' (con espacio) y el sed solo reemplazó 'F_H8',
+  así que la primera pasada del reporte salió con códigos "F H8". Se
+  detectó, se corrigieron los dos scripts y se re-corrió la detección
+  completa; los números son idénticos y el reporte final tiene 225
+  códigos H9 y 0 códigos H8 (verificado). En las tandas siguientes,
+  verificar el string del código tras el sed antes de correr.
+- Reporte: diagnostico_usuario/barrido_tanda9/ (reporte.json, renders,
+  planchas, revision/). Nada del proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 10 del barrido completo (mujeres, pelo 10)
+- 225 renders en el navegador MCP (F, Hair10 Messy Bun, moño alto
+  despeinado; ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-4; colores por
+  defecto), 1200×1600, ~1 s por combo. Servidor.py estaba caído al
+  empezar y se relanzó con nohup (responde 200).
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7, las 9 planchas revisadas visualmente.
+  Los 225 "sospechosos" eran solo D4 (trazos sueltos): 7 componentes
+  distintos, todos arte ya conocido, NINGUNO nuevo (sombra esquina de
+  la boca, mota de sombra de la mandíbula, línea/sombra junto a la
+  oreja, borde derecho mandíbula/cuello, borde cuello capucha O3).
+  D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (450 falsas alarmas §11, 2 por
+  combo); azules en pelo 0 px; disco ámbar intacto (racimo cálido por
+  ojo con este pelo: E1 27, E2 10, E3 39, E4 20, E5 36, desviación 0,0;
+  E2 es el valor más bajo hasta ahora porque el moño despeinado tapa
+  más de su esquina interior; iris uniforme); ojos y bocas presentes en
+  los 225; calvas/pelo movido (D6) 0 px; manchas/trazos raros en todo el
+  retrato (D7) 0 px.
+- Lección de la tanda 9 aplicada: tras el sed se corrigieron a mano los
+  restos 'Hair9_Front/Back' y 'tanda': 9; reporte final con 225 códigos
+  H10 y 0 códigos H9 (verificado).
+- Reporte: diagnostico_usuario/barrido_tanda10/ (reporte.json, renders,
+  planchas; revision/ vacía: no hubo sospechosos nuevos). Nada del
+  proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 11 del barrido completo (mujeres, pelo 11)
+- 225 renders en el navegador MCP (F, Hair11 Side Ponytail, coleta
+  lateral; ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-4; colores por
+  defecto), 1200×1600, ~1 s por combo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7, las 9 planchas revisadas visualmente.
+  Los 225 "sospechosos" eran solo D4 (trazos sueltos): 8 componentes
+  distintos, todos arte ya conocido, NINGUNO nuevo (sombra esquina de
+  la boca, mota de sombra de la mandíbula, línea/sombra junto a la
+  oreja, línea vertical mandíbula-cuello, borde cuello capucha O3,
+  borde derecho mandíbula/cuello). El borde derecho reaparece como
+  componente aparte porque Hair11_Front no cubre esa zona (0/217 px
+  con alfa>30), mientras Hair10_Front sí la cubría (84/217 px) — es
+  arte de la Base, no defecto. D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11, 1 por
+  combo); azules en pelo 0 px; disco ámbar intacto (desviación máx.
+  0,0 px respecto a la mediana calibrada por ojo con este pelo);
+  ojos y bocas presentes en los 225 (ojos mín. 99,7 % de la mediana,
+  boca 100 %); calvas/pelo movido (D6) 0 px; manchas/trazos raros en
+  todo el retrato (D7) 0 px.
+- Reporte: diagnostico_usuario/barrido_tanda11/ (reporte.json, renders,
+  planchas; revision/ vacía: no hubo sospechosos nuevos). Nada del
+  proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 12 del barrido completo (mujeres, pelo 12)
+- 225 renders en el navegador MCP (F, Hair12 Long Curly, pelo largo
+  rizado; ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-4; colores por
+  defecto), 1200×1600, ~1 s por combo. Servidor.py respondía 200 al
+  empezar; no hizo falta relanzarlo.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7, las 9 planchas revisadas visualmente.
+  Los 225 "sospechosos" eran solo D4 (trazos sueltos): 2 componentes
+  idénticos en los 225 renders, ambos arte conocido de la mandíbula
+  (mota de sombra x580-601 y701-720, 51 px; línea y sombra junto a la
+  oreja x688-719 y727-777, 188 px), verificados con zoom en el render
+  canónico. D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Confirmado limpio: lunares reales 0 (225 falsas alarmas §11, 1 por
+  combo); azules en pelo 0 px; disco ámbar intacto (desviación 0 px en
+  los 5 ojos, calibrado con este pelo); ojos y bocas presentes en los
+  225 (no vacío 1,22–1,23 M px); calvas/pelo movido (D6) 0 px;
+  manchas/trazos raros en todo el retrato (D7) 0 px.
+- Con esta tanda quedan COMPLETAS las 12 tandas de mujer (pelos 1-12),
+  todas limpias salvo los 3 arreglos de la tanda 0 (pendientes de subir).
+- Reporte: diagnostico_usuario/barrido_tanda12/ (reporte.json, renders,
+  planchas, revision/zoom_mandibula_F_H12_O1_E1_N1_M1.png). Nada del
+  proyecto modificado en esta tanda.
+
+## 2026-11-22 — Tanda 13 del barrido completo (hombres, pelo 1)
+- 540 renders en el navegador MCP (M, Hair1 «Style 1»; ropa 0-2 × ojos
+  0-4 × nariz 0-2 × boca 0-2 × vello 0-3 None/Mustache/Stubble/Full
+  Beard; colores por defecto), 1200×1600, ~1 s por combo. Vello
+  verificado que cambia de verdad (bigote 2.174 px, barba incipiente
+  7.195 px, barba completa 69.473 px) y sexo Male confirmado visualmente.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7 adaptados a hombres (D1/D4 excluyen la zona
+  del vello; D6/D7 con canónico por ropa+vello; la textura de la barba
+  es arte). Las 22 planchas revisadas visualmente.
+  Los 540 "sospechosos" eran solo arte: D4 4 componentes repetidos y
+  D1 2 falsas alarmas §11, revisados con zoom. D2, D3, D5, D6 y D7 no
+  marcaron nada.
+- Arte de hombre identificado (guardado en reporte.json →
+  resumen.arte_bboxes_hombre, para las tandas 14-16): borde derecho
+  mandíbula/cuello (829,829,853,899, 540 renders), línea y sombra junto
+  a la oreja (678,721,702,768, 405; FH3 la tapa), línea del mentón
+  (347,818,365,859, 405; FH3 la tapa), borde inferior mandíbula/cuello
+  con la ropa (481,892,506,899, 180; solo FH0/FH1, O1/O3), contorno/
+  sombra inferior de la mandíbula D1 (364,860,373,891 y 502,869,551,891,
+  180 cada uno). Los componentes de arte de mujer (sombra esquina de la
+  boca, mota de sombra de la mandíbula, línea vertical mandíbula-cuello,
+  borde cuello-capucha O3) NO aparecen en hombres.
+- VERIFICACIÓN DEL ARREGLO DEL STAGE20: la barba completa FH3 (Facial-
+  Hair3) NO tiene grietas ni huecos: 0 px claros dentro del núcleo de
+  la barba (77.947 px) en 3 renders de muestra, 100 % de solape oscuro;
+  la línea fina curva es arte (también en la referencia corregida del
+  stage20, barba_FH3.png). Verificado también por mí a ojo en el zoom.
+- Confirmado limpio: lunares reales 0 (360 falsas alarmas §11, mandí-
+  bula); azules en pelo 0 px; disco ámbar sin desviaciones >25 px de la
+  mediana por ojo; ojos y bocas presentes en los 540 (mínimos ≈
+  medianas); calvas/pelo movido (D6) 0 px; manchas/trazos raros en todo
+  el retrato (D7) 0 px.
+- Reporte: diagnostico_usuario/barrido_tanda13/ (reporte.json, renders,
+  planchas, revision/ 7 zooms). Nada del proyecto modificado en esta
+  tanda.
+
+## 2026-11-23 — Tanda 14 del barrido completo (hombres, pelo 2)
+- 540 renders en el navegador MCP (M, Hair2 «Style 2»; ropa 0-2 × ojos
+  0-4 × nariz 0-2 × boca 0-2 × vello 0-3 None/Mustache/Stubble/Full
+  Beard; colores por defecto), 1200×1600, ~1 s por combo. Vello
+  verificado visualmente antes de seguir (FH0 sin vello, FH1 bigote,
+  FH2 barba corta, FH3 barba completa) y sexo Male confirmado.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7 adaptados a hombres. Las 22 planchas
+  revisadas visualmente. Los 540 "sospechosos" eran solo arte: D4
+  1.305 px en 5 grupos (línea del mentón, borde derecho mandíbula/
+  cuello, borde inferior mandíbula-cuello), todos arte conocido,
+  revisados con zoom. D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Diferencias con la tanda 13: la línea junto a la oreja NO aparece
+  con Hair2 (el pelo tapa esa zona); el borde derecho de la mandíbula
+  empieza en y=816 (antes 829) y SE PARTE en dos componentes solo en
+  la ropa O3 ((828,816,835,849) + (836,850,854,899)) por el cruce del
+  cuello de la chaqueta — verificado con zoom, es la misma línea de
+  contorno, no un defecto. Bboxes nuevos añadidos en
+  reporte.json → resumen.arte_bboxes_hombre.
+- VERIFICACIÓN DEL ARREGLO DEL STAGE20: la barba completa FH3 NO tiene
+  grietas ni huecos: 0 px claros dentro del núcleo de la barba
+  (71.710 px) en 3 renders de muestra; la línea fina curva es arte.
+  Verificado también por mí a ojo en el zoom.
+- Confirmado limpio: lunares reales 0 (360 falsas alarmas §11); azules
+  en pelo 0 px; disco ámbar sin desviaciones >25 px de la mediana por
+  ojo; ojos y bocas presentes en los 540; calvas/pelo movido (D6) 0 px;
+  manchas/trazos raros en todo el retrato (D7) 0 px.
+- Nota de método: al adaptar los scripts con sed hubo que corregir dos
+  cosas antes de correr: `FacialHair1` se había convertido en
+  `FacialHair2` en VELLO_N, y el sed `tanda.: 13` corrompió la línea
+  `{'tanda': 13, ...}`. Verificado después: sintaxis OK, sin restos de
+  H1/Hair1/tanda13.
+- Reporte: diagnostico_usuario/barrido_tanda14/ (reporte.json, renders,
+  planchas, revision/ 6 zooms). Nada del proyecto modificado en esta
+  tanda.
+
+## 2026-11-23 — Tanda 15 del barrido completo (hombres, pelo 3)
+- 540 renders en el navegador MCP (M, Hair3 «Style 3»; ropa 0-2 × ojos
+  0-4 × nariz 0-2 × boca 0-2 × vello 0-3 None/Mustache/Stubble/Full
+  Beard; colores por defecto), 1200×1600, ~1 s por combo. Vello
+  verificado a ojo en los 4 valores y sexo Male confirmado.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7 adaptados a hombres. Las 22 planchas
+  revisadas visualmente. Los 540 "sospechosos" eran solo D4 (trazos
+  sueltos): 1.530 componentes en 4 grupos, todos arte de la Base
+  verificado con zoom. D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Novedades de arte con Hair3: el pelo 3 tapa el tramo superior del
+  borde derecho de la mandíbula (y 816-849), así que ese borde ya no
+  aparece ni como pieza única ni partido en O3 — solo queda el tramo
+  inferior (835,850,853,899) en los 540; y la línea junto a la oreja
+  (678,721,702,768) REAPARECE con Hair3 (en tanda 14 con Hair2 no
+  aparecía; en tanda 13 con Hair1 sí).
+- VERIFICACIÓN DEL ARREGLO DEL STAGE20: la barba completa FH3 NO tiene
+  grietas ni huecos: las 14 grietas del stage20 NO reaparecieron (zoom
+  + D7 0 px en los 135 renders FH3). Verificado también por mí a ojo en
+  el zoom.
+- Confirmado limpio: lunares reales 0 (360 falsas alarmas §11 en 2
+  bboxes de mandíbula); azules en pelo 0 px; disco ámbar sin desvia-
+  ciones >25 px de la mediana con este pelo en ningún ojo; ojos y bocas
+  presentes en los 540; calvas/pelo movido (D6) 0 px; manchas/trazos
+  raros en todo el retrato (D7) 0 px.
+- Incidencia: la primera pasada de detectar_tanda15.py fue interrumpida
+  por un reinicio del runtime (~8,5 min, sin reporte.json porque el
+  script solo escribe al final — nada parcial que rescatar); se relanzó
+  desde cero y terminó bien.
+- Reporte: diagnostico_usuario/barrido_tanda15/ (reporte.json, renders,
+  planchas, revision/ 5 zooms). Nada del proyecto modificado en esta
+  tanda.
+
+## 2026-11-23 — Tanda 16 del barrido completo (hombres, pelo 4)
+- 540 renders en el navegador MCP (M, Hair4 «Style 4», pelo corto
+  rizado; ropa 0-2 × ojos 0-4 × nariz 0-2 × boca 0-2 × vello 0-3
+  None/Mustache/Stubble/Full Beard; colores por defecto), 1200×1600,
+  ~1 s por combo. Servidor.py estaba caído al empezar y se relanzó
+  (responde 200). Vello verificado a ojo y sexo Male confirmado.
+- **0 defectos reales. Errores arreglados en esta tanda: 0.**
+- Controles ampliados D1-D7 adaptados a hombres. Las 22 planchas
+  revisadas visualmente. Los 540 "sospechosos" eran solo arte: D4
+  1.305 trazos en 5 grupos, todos arte de la Base verificado con zoom.
+  D1, D2, D3, D5, D6 y D7 no marcaron nada.
+- Novedad de arte con Hair4: el borde derecho de la mandíbula es
+  pieza única (828,824,853,899) en O1/O2 y partido en O3; el pelo tapa
+  un poco más arriba que con Hair2 (y0 824 vs 816) y mucho menos que
+  con Hair3 (que tapaba hasta y850). La línea junto a la oreja NO
+  aparece con Hair4 en ningún render (el pelo la tapa por completo,
+  igual que con Hair2).
+- VERIFICACIÓN DEL ARREGLO DEL STAGE20: la barba completa FH3 NO tiene
+  grietas ni huecos: las 14 grietas del stage20 NO reaparecieron (135
+  renders FH3, zoom verificado). Verificado también por mí a ojo en el
+  zoom.
+- Confirmado limpio: lunares reales 0 (360 falsas alarmas §11); azules
+  en pelo 0 px; disco ámbar sin desviaciones >25 px de la mediana con
+  este pelo en ningún ojo; ojos y bocas presentes en los 540; calvas/
+  pelo movido (D6) 0 px; manchas/trazos raros en todo el retrato (D7)
+  0 px.
+- Con esta tanda quedan COMPLETAS las 4 tandas de hombre (pelos 1-4),
+  todas limpias, y las 12 de mujer también. Solo falta la tanda 17
+  (colores).
+- Reporte: diagnostico_usuario/barrido_tanda16/ (reporte.json, renders,
+  planchas, revision/ 3 zooms). Nada del proyecto modificado en esta
+  tanda.
+
+## 2026-11-23 — Tanda 17 del barrido completo (COLORES, última)
+- 555 renders en el navegador MCP (1200×1600, ~537 s): A) pelo mujer
+  12 pelos × 24 colores = 288; B) ojos mujer 5 × 7 colores = 35; C) ropa
+  mujer 3 × 24 colores = 72; D) pelo hombre 4 × 24 colores = 96; E) piel
+  mujer 4 tonos × 12 pelos = 48; F) piel hombre 4 tonos × 4 pelos = 16.
+  Las 28 planchas revisadas visualmente + zooms de veredicto.
+- **1 DEFECTO REAL ENCONTRADO Y ARREGLADO (T17-01): la solapa/cuello de
+  Outfit1 mujer estaba dibujada en la capa Base, no en Outfit1.** No
+  seguía el tinte de ropa y sí el de piel: con Royal Blue el jersey era
+  azul vivo y la solapa seguía salvia/gris; con piel Deep la solapa se
+  oscurecía a marrón. Evidencia: píxel (520,1100) = (122,118,108) con
+  OC00 White y con OC16 Coral (crudo Base exacto); con SK3 Deep =
+  (76,54,36) = crudo × tinte Deep. Tamaño: solapa estricta 5.757–13.095
+  px según el pelo; banda aprox. x430–650, y950–1200. Afectaba a 395
+  renders (todas las mujeres con O1); visible con claridad en 59 y sutil
+  con los valores por defecto — por eso las tandas 1–16 no lo vieron.
+  Además, la pieza derecha de esa solapa (973 px) asomaba por Outfit2
+  («Green Jacket»), que no la cubre del todo: mismo defecto en O2.
+- **Corrección (método stage20, script herramientas/tanda17_fix.py):**
+  snapshot ANTES en versiones/2026-11-23_tanda17-antes-fixes/ (md5
+  verificado). Solapa (14.174 px) copiada tal cual de Base a Outfit1
+  (White/Light son tinte neutro [1,1,1]); hueco en Base rellenado con
+  piel inpaintada (difusión de Laplace enmascarada, solo desde piel);
+  hueco de Outfit2 (973 px) rellenado con el verde del cuello de la
+  chaqueta vecina. Asserts: 0 px cambiados fuera de la solapa (Base y
+  Outfit1) y fuera del hueco (Outfit2); solapa copiada idéntica.
+  Archivos: Base, Outfit1 y Outfit2 de Female (md5 nuevos en
+  reporte.json → resumen.correccion).
+- **Verificación post-arreglo (herramientas/tanda17_verificar.py +
+  navegador):** O1 por defecto BYTE-IDÉNTICO al pre-fix (maxdiff 0);
+  O1 Royal Blue: solapa (520,1100) = (37,50,92) exacto, 11.258 px
+  difieren todos dentro de la solapa; O1 Deep: solapa (122,118,108)
+  exacto (ya no sigue la piel); O2 Royal Blue: hueco azul (19,27,42),
+  sin franja salvia; O3 sin cambios salvo 40 px de borde
+  semitransparente. Re-render en el navegador (V1/V2/V3): mismos valores
+  exactos, V3 default byte-idéntico. Zooms en
+  diagnostico_usuario/barrido_tanda17/revision/zoom_fix_*.png. 0 px de
+  piel nueva en el pecho.
+- Confirmado limpio (160 renders): tinte de pelo cubre frente+espalda en
+  los 24 colores y 12 pelos; iris uniforme en los 7 colores de ojos, sin
+  disco ámbar; O2 y O3 cubren completos (salvo el hueco ya arreglado);
+  piel uniforme, nariz sigue el tinte; 0 lunares reales. No-defectos
+  clasificados: reflejos claros del pelo, hebras del arte, patilla de
+  hombre (arte), 113 flags D3 de hombre = artefacto de calibración
+  (calibrar D3-EC0 por sexo+ojos la próxima vez).
+- **Errores arreglados en esta tanda: 2 (T17-01 y T17-02).** BARRIDO COMPLETO
+  TERMINADO (tandas 0–17). Total general: 5 errores arreglados
+  (tanda 0: 3, tanda 17: 2; tandas 1–16: 0).
+- **T17-02 (hallado 2026-11-23 ~03:00 por Dani en revisión visual propia
+  del fix T17-01, con zoom):** Female Outfit1 y Outfit2 tenían agujeros
+  interiores (alfa 0) dentro de la silueta de la prenda por los que se veía
+  la piel de Base: motas beige sobre el jersey (O1: 817 px, 46 comp.,
+  mayores 277 y 213 px, en la línea de pliegue izquierda; O2: 302 px,
+  68 comp., mayor 46 px, motas sobre la camisa blanca). Evidencia: píxel
+  (389,1391) en O1 Royal Blue = (190,172,158) = Base exacto con Outfit1
+  alfa 0. El barrido no lo detectó porque el defecto está horneado en la
+  capa (también en el canónico de D7). **Fix (herramientas/
+  tanda17b_fix_huecos.py, snapshot versiones/2026-11-23_tanda17b-antes-
+  huecos/):** 1.119 px rellenados con la prenda vecina (Laplace, 500 it.),
+  alfa 255; asserts 0 px fuera de las máscaras. **Verificado en motor
+  (5 renders) y navegador (3 renders, verificacion_postfix_t17b/):**
+  0 px de piel en la zona del parche (antes 151), 0 px de piel en los
+  817 px de agujero, colores en agujeros azul Royal; navegador vs motor
+  en agujeros maxdiff 10 (V1) y 9 (V3). Nuevos md5: Outfit1
+  3024315b62e20d061b3ead506f5b4bad, Outfit2
+  3bd789cad4e1b32aceffa5f22ff5f7b2. Los agujeros de pelo/ojos/barba son
+  diseño (hebras, construcción del ojo, textura de barba) y NO se tocaron;
+  Outfit3 y hombre (motas de 1 px) son ruido y NO se tocaron.
+- PENDIENTE SUBIR (sin orden de Stiven): los 3 archivos arreglados de la
+  tanda 17 (Female Base/Outfit1/Outfit2 — Outfit1 y Outfit2 ya incluyen
+  TAMBIÉN el fix T17-02) + los 3 de la tanda 0
+  (Female/Hair6_Front, Male/Hair2_Front, Male/FacialHair3) existen SOLO
+  en Linux; nada subido a GitHub ni a Drive.
+- Reporte: diagnostico_usuario/barrido_tanda17/ (reporte.json con las
+  dos correcciones registradas, renders, planchas, revision/ 17+6 zooms,
+  verificacion_postfix/ 3 renders de navegador T17-01,
+  verificacion_postfix_t17b/ 3 renders de navegador T17-02).
