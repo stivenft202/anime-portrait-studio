@@ -119,6 +119,24 @@ def _ojos_tinte(a, nombre, idx, sexo=''):
         escala_d = np.array(destino, float) / np.maximum(prom_disco, 1.0)
         o[..., :3] = np.where(disco[..., None], np.clip(o[..., :3] * escala_d, 0, 255), o[..., :3])
         o[..., :3] = np.where(rim[..., None], np.clip(o[..., :3] * escala_d, 0, 255), o[..., :3])
+    # Tanda 20 (2026-11-23): destino casi sin saturación (Gris): el iris
+    # conserva la textura de luminancia del arte y se ve moteado/sucio
+    # (parches verdes, morados y claros). Se aplana: cada píxel del iris
+    # toma el color destino escalado a una luminancia comprimida un 65%
+    # hacia la del destino. Solo afecta a destinos desaturados (Gris);
+    # los colores saturados conservan su textura. Pupila y brillos no
+    # están en la máscara, así que no se tocan.
+    dest = np.array(destino, float)
+    if dest.max() - dest.min() < 30:
+        iris_todo = masc | rim
+        if disco is not None:
+            iris_todo = iris_todo | disco
+        lum_dest = dest.mean()
+        pix = o[..., :3][iris_todo].astype(float)
+        lum_pix = pix.mean(axis=1, keepdims=True)
+        lum_nueva = lum_pix * 0.35 + lum_dest * 0.65
+        escala_lum = (lum_nueva / max(lum_dest, 1.0)).reshape(-1, 1)
+        o[..., :3][iris_todo] = np.clip(dest * escala_lum, 0, 255)
     return o
 
 def _sobre(fondo, a):

@@ -947,6 +947,130 @@
   `boca-sorprendido-R_2026-11-23.zip` (las 2 capas nuevas + NOTA.txt, 10.378
   bytes) — cada nueva versión es un nuevo archivo en GitHub:
   https://github.com/stivenft202/anime-portrait-studio/releases/tag/v2026-11-23-boca-sorprendido-R
+  **Actualización 2026-11-23 ~12:54: por orden de Stiven («Sí, sube la
+  boca R a Drive/Unity también»), las 2 bocas R subidas a Drive/Unity
+  (Female 1MgMpFdnSnV0-V11M-PXgbAPPvwtn23l9, Male
+  1kuye8Paw8bLB5Sla516XiHNKVJVdw6Q1), 2/2 verificadas por md5
+  (95c82306... / 37733194...). Desde ahora GitHub = Drive/Unity = boca R.**
+
+## 2026-11-23 — SÚPER MÉTODO: escaneo píxel por píxel de las 67 capas (orden de Stiven)
+- Stiven mandó 4 capturas de Unity con círculos rojos (13:07): puntito en
+  la nariz (2 mujeres), marcas en el cuello, trazos sueltos en pelo y
+  ropa, marquitas en los ojos, puntito en la mejilla. Orden: blindarse con
+  un súper método potente que detecte hasta el error más mínimo con zoom,
+  arreglar todo y grabar vídeo al final. Eligió el método completo en las
+  67 capas.
+- Combos identificados de sus capturas: C1 `F H7 O3 E1 N3 M1 | HC10 ST2
+  OC17 EC3`, C2 `M H4 O2 E1 N2 M1 | HC12 ST2 OC19 EC2 FH0`, C3 `M H2 O1 E5
+  N2 M1 | HC1 ST4 OC7 EC3 FH2`, C4 `F H3 O3 E1 N3 M1 | HC22 ST1 OC4 EC5`.
+- **El puntito de la nariz era EL MISMO en las dos mujeres: la coma marrón
+  de Female Nose3 (81 px, x324-333 y693-707), NO las motitas de 1 px de
+  Nose1.** Lección: no borrar a ciegas; la posición en la captura manda.
+- Método: escaneo A NIVEL DE CAPA (los renders no ven defectos horneados),
+  cuadrícula de celdas 100×100 con zoom 4x + detectores D-STRAY
+  (componentes desprendidos oscuros y café medio), D-PROTRUDE
+  (protuberancias finas fuera de la silueta), D-SPECK (motitas 1-3 px),
+  D-HOLE (agujeros interiores en prendas) + revisión visual de las
+  planchas con el propio ojo.
+- **Arreglos: 8.966 px en 23 capas** (snapshot previo en
+  `versiones/2026-11-23_supermetodo-antes/`, scripts
+  `herramientas/supermetodo_*.py`): coma de Nose3 F (89 px), motitas
+  Nose1 F (2 px) y M (7 px), rasguño curvo en la mejilla de Base F (176
+  px, inpaint), motitas en cuello de Base M (32 px), rayita diagonal fuera
+  de la cara en Base M (20 px), fragmento flotante en Base M (5 px),
+  trazos sueltos en Hair4 M (219 px), motitas en Eyes_Surprised M (65 px),
+  9 fragmentos largos tipo cuchilla en Hair3_Back F (5.233 px),
+  trazo suelto en Outfit3 F (48 px), trazos sueltos en Hair2 M (291 px),
+  Hair3 F (110 px), Hair1 M (88 px), Hair3 M (237 px), Hair4 F (196 px),
+  Hair11 F (73 px), Hair2 F (107 px), Hair1 F (60 px), hilo vertical en
+  Outfit2 M (86 px), fragmento en Hair2_Back F (28 px) + **defringe:
+  halo blanco/beige en el borde exterior de las 6 ropas (1.559 px,
+  artefacto de recorte, clase nueva)** + 234 px de Base M que se
+  transparentaba por el borde semitransparente de Outfit2 (umbral
+  correcto: silueta OPACA alfa>200, no alfa>0).
+- Verificación: las 4 capturas re-renderizadas post-fix, cada marca de
+  Stiven eliminada (zooms 4x revisados por el coordinador y por Dani:
+  coma de nariz fuera, queda solo sombra suave; mejilla limpia). Detectores
+  re-corridos: los componentes arreglados dan 0 candidatos. Control sin
+  tinte de ojos: 0 px fuera de objetivo (los 826 px de C3 con tinte son
+  redondeo del `_ojos_tinte` del motor, no daño al arte; en Unity el tinte
+  usa variantes horneadas, no afecta).
+- Dudosos NO arreglados (para el ojo de Stiven): rastro claro muy tenue
+  donde estaba el rasguño de la mejilla (invisible a tamaño normal);
+  cola inferior del ojo en C3 (conectada, diseño, se lee como gotita);
+  ribete del cuello que se tiñe con la ropa (pendiente de decisión).
+- Vídeo final: `diagnostico_usuario/videos/video_supermetodo_2026-11-23.webm`
+  (41,68 s, 14 combos, todos Sorprendido). PENDIENTE subir a GitHub/Drive
+  cuando Stiven lo ordene (23 archivos cambiados).
+
+## 2026-11-23 — RIBETE DEL CUELLO (error que el súper método NO vio; orden implícita de Stiven)
+- Stiven (2026-11-23 ~14:55), viendo el vídeo del súper método: del
+  segundo 9 al 21 todos los psj salen con un trazo sobrante en el cuello
+  (banda del color de la ropa: rosa con Rose, amarilla con Yellow).
+  Pregunta: de qué sirvió el súper método si siguen estos errores.
+- Respuesta honesta: el súper método sí sirvió para su clase (trazos
+  desprendidos, motitas, agujeros: 8.966 px, las 4 capturas limpias),
+  pero era CIEGO a esta clase: la banda es parte CONECTADA de la capa de
+  ropa (el ribete/cuello interior, y en O2 la camisa blanca), no un trazo
+  suelto, así que ningún detector la marcó. Dani ya la había visto en los
+  7 ciclos («parche del cuello») y la dejó como dudosa pendiente de la
+  decisión de Stiven; Stiven decidió: es error.
+- Causa medida: el ribete sube por detrás del cuello hasta y~874 (mujer)
+  / y~821 (hombre O2) y, como la ropa (30) va por encima de la Base (20),
+  pinta sobre la piel del cuello. Es pálido en crudo, así que con el tinte
+  se vuelve chillón (amarillo/rosa); con Blanco apenas se nota, por eso se
+  escondió en los renders por defecto.
+- Fix fase 1 (`herramientas/ribete_cuello_fix.py`, snapshot
+  `versiones/2026-11-23_ribete-cuello-antes/`): borrados 29.384 px de las
+  6 ropas donde la Base es opaca y y<960 (el cuello por encima de los
+  hombros). Verificado: amarillo en el cuello 6.159 px → 0 px.
+- Fix fase 2 (`herramientas/ribete_cuello_fix_fase2.py`, snapshot
+  `versiones/2026-11-23_ribete-cuello-fase2-antes/`): quedaba una franja
+  brillante en la base del cuello (y960-1010, el ribete bajo); recoloreados
+  6.367 px en F O2 + 3.049 px en F O3 al color del cuerpo (el ribete deja
+  de contrastar; las líneas oscuras de pliegues se conservan). Verificado:
+  amarillo en cuello+base 9.270 px → 65 px (0 sobre el cuello).
+- Verificación: renders Amarillo/Rosa/Blanco + hombre O2 revisados por
+  Dani a ojo (cuello limpio, el cuello de la prenda queda en la base del
+  cuello como debe ser). Vídeo nuevo grabado:
+  `diagnostico_usuario/videos/video_ribete_2026-11-23.webm` (41,68 s,
+  14 combos, todos Sorprendido; 2 fotogramas revisados por Dani).
+  PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene (las 6 ropas ya
+  estaban en los 23 archivos del súper método; total sigue siendo 23
+  capas + scripts nuevos).
+
+## 2026-11-23 — TANDA 20 (2 capturas nuevas de Stiven, revisión POR CAPA)
+- Stiven (2026-11-23 ~15:50) envió 2 capturas más con errores y ordenó:
+  revisarlos por capa, sin barrer los combos. Hallazgos medidos en capa:
+- **Base F, punta de la nariz (la marca de la captura 1):** la capa
+  Nose3 está LIMPIA (0 px oscuros/marrones); la mancha es de la BASE:
+  202 px oscuros + 941 px marrones en la punta + motita negra. Fix
+  (`herramientas/tanda20_fix.py`, snapshot
+  `versiones/2026-11-23_tanda20-antes/`): mancha aclarada 65% hacia la
+  piel (queda sombra suave) y motita borrada por inpaint. 457 px.
+- **Base M, frente (la marca de la captura 2):** dos triángulos marrones
+  (sombra de pelo geométrica que asoma como mancha). Chico 115 px en
+  x464-478 y400-422 (visible con H2/H3; el combo de Stiven es H3).
+  Grande 950 px en x400-431 y311-383 (visible con H1). Fix: inpaint
+  con piel. 1.367 px.
+- **Pelo H4 F y H3 M (bordes):** halo claro en el borde (defringe, misma
+  clase que en las ropas). Fix: recoloreado al color del pelo vecino.
+  H4_Front 268 px, H4_Back 831 px; H3 M 0 px (no tenía halo). Las hebras
+  sueltas del pelo ondulado son DISEÑO y no se tocan.
+- **Ojo Gris moteado (la marca del ojo en la captura 2):** NO es la capa
+  Eyes_Angry (el arte verde está limpio) sino el TINTE: con Gris el iris
+  conservaba la textura de luminancia y se veía sucio (parches verdes,
+  morados, disco lavanda). Fix en `motor.py` `_ojos_tinte`: si el destino
+  es casi sin saturación (solo Gris), el iris se aplana al color destino
+  (luminancia comprimida 65% hacia él). Verificado: iris Gris uniforme,
+  Azul intacto (control). Re-bakeadas las 10 variantes Gray de
+  `unity/EyesColor/` (`herramientas/tanda20_rebakear_gris.py`; sat 10,
+  lum_std 17-25). Los otros 50 variantes no cambian.
+- Verificación: los 2 combos re-renderizados y revisados por Dani a ojo
+  (nariz limpia con sombra suave, frente limpia, iris Gris uniforme).
+  PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene (las capas
+  tocadas ya estaban en los 23 del súper método; se suman motor.py y las
+  10 variantes Gray).
 - Script nuevo `herramientas/grabar_video.js` (reutilizable): graba el
   creador con Playwright; opciones --duracion, --segundos, --boca
   (sorprendido|aleatorio), --sexos, --salida, --url. Reemplaza a
@@ -976,4 +1100,9 @@
 - Verificación: render en motor pre-fix (snapshot) vs post-fix del primer
   combo: cambian EXACTAMENTE 19 px, todos dentro de la rayita, nada más.
   Render en el navegador (copia de prueba) del primer combo: boca limpia,
-  sin rayita. PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene.
+  sin rayita. **SUBIDO 2026-11-23 ~12:48 por orden de Stiven («Sí, súbelo a
+  GitHub y Drive»): GitHub commit 211c3547 (180 archivos, verificado
+  180/180, Hair1_Front por raw md5 94140fdb...) + release
+  v2026-11-23-rayita-H1 (id 455781891) con rayita-H1_2026-11-23.zip (asset
+  id 783950284, 2.029.843 bytes) y descripción completa de los cambios;
+  Drive/Unity 1/1 verificado por md5. GitHub = Drive/Unity = rayita.**
