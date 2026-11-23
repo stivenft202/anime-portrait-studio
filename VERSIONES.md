@@ -655,12 +655,102 @@
   3bd789cad4e1b32aceffa5f22ff5f7b2. Los agujeros de pelo/ojos/barba son
   diseño (hebras, construcción del ojo, textura de barba) y NO se tocaron;
   Outfit3 y hombre (motas de 1 px) son ruido y NO se tocaron.
-- PENDIENTE SUBIR (sin orden de Stiven): los 3 archivos arreglados de la
-  tanda 17 (Female Base/Outfit1/Outfit2 — Outfit1 y Outfit2 ya incluyen
-  TAMBIÉN el fix T17-02) + los 3 de la tanda 0
-  (Female/Hair6_Front, Male/Hair2_Front, Male/FacialHair3) existen SOLO
-  en Linux; nada subido a GitHub ni a Drive.
+- **SUBIDO 2026-11-23 ~08:00 por orden de Stiven («Sí, súbelo a GitHub y
+  Drive»):** GitHub commit
+  `eb0eb6e40ada6fd998986d543c422bb1945f4889` (159 archivos, 0 diferencias
+  blob verificado; Outfit1 y Base confirmados por raw.githubusercontent.com)
+  y Drive/Unity 6/6 verificados por md5 re-descargado (script
+  herramientas/sweep_subir_drive.py). **GitHub = Drive/Unity = barrido
+  completo (Linux + stage20 + 5 fixes).** OJO: el staging inicial de 97
+  archivos NO incluía unity/ (62 archivos: 60 EyesColor + README +
+  PortraitCreator.cs) y el doc del conector no lo listaba; se añadió
+  antes de subir — sin eso el commit habría BORRADO unity/ del repo.
+  PortraitCreator.cs local = blob del repo (65fe7f34...), sin cambios.
+  Que Stiven deje sincronizar Drive y reabra Unity.
 - Reporte: diagnostico_usuario/barrido_tanda17/ (reporte.json con las
   dos correcciones registradas, renders, planchas, revision/ 17+6 zooms,
   verificacion_postfix/ 3 renders de navegador T17-01,
   verificacion_postfix_t17b/ 3 renders de navegador T17-02).
+- **Tanda 18 (colores hombre, cierra el hueco de la tanda 17) TERMINADA
+  2026-11-23 ~08:29: 75 renders en el navegador MCP (72: outfits O1/O2/O3
+  de hombre × 24 colores de ropa, piel Light; + 3 controles White con
+  piel Deep). 0 ERRORES REALES.** D-EXACT ropa 0 px y D-EXACT-CRUCE 0 px
+  (toda la prenda cambia con el color); D-PIEL-CRUCE 0 px, maxdif 0.0
+  (la prenda es idéntica entre piel Light y Deep: nada de la ropa está
+  en Base); T17-02 0 px de agujeros con piel. 9 sospechosos, todos
+  no-defectos: patilla (arte conocido, mismo bbox que tanda 16), pelo
+  semi-transparente sobre outfit/piel (composición, alfa 201–245),
+  borde semi-transparente de la capucha O2 (artefacto de máscara),
+  D-LAPEL O2 540 px = líneas finas del contorno de la mandíbula y sombra
+  del cuello (arte de Base, no pieza de ropa; verificado por Dani con el
+  mapa), tela beige de O3 (color propio del outfit, no piel). 4 planchas
+  revisadas por Dani (O2 en 24 colores tiñe uniforme; controles Deep:
+  piel oscura, ropa idéntica). Reporte:
+  diagnostico_usuario/barrido_tanda18/ (reporte.json, renders, planchas,
+  revision/). **Nada que subir: 0 archivos cambiados.**
+- **Tanda 19 (lunares en boca y nariz) TERMINADA 2026-11-23 ~09:15: hallado
+  por Stiven viendo el vídeo de 1 min (randomize): lunares en boca y nariz
+  en hombres y mujeres. Diagnóstico: (1) NARIZ: Nose2 (mujer y hombre) tiene
+  una "coma" oscura gruesa en la punta (F 103 px, M 112 px) que se lee como
+  lunar; Nose1 hombre tiene 7 motitas sueltas alrededor de la fosa (32 px);
+  Nose1 mujer una motita en la piel junto a la nariz (5 px). (2) BOCA: la
+  sombra de la comisura + borde inferior del labio en la capa Base (ambos
+  sexos) forman una mancha negra en la esquina de la boca en TODOS los
+  combos; además ticks sueltos en Mouth_Happy (F 12 px, M 13 px) y un trazo
+  suelto bajo Mouth_Neutral hombre (15 px). Los 6 combos registrados del
+  vídeo tenían lunar en nariz Y en boca: 00 F H1 N1 M1, 05 F H2 N2 M2
+  (la coma de Nose2, la más visible), 10 M H3 N1 M3, 15 F H11 N2 M5,
+  20 M H2 N1 M3, 25 F H7 N1 M4. Fix (herramientas/tanda19_fix_lunares.py,
+  snapshot versiones/2026-11-23_tanda19-antes-lunares/): 300 px borrados
+  (comas + motitas + ticks) y 304 px aclarados (Base comisura/borde,
+  mezcla 60% hacia piel local, se conserva la forma como sombra suave).
+  10 capas: F/M Base, F Nose1/2/3, M Nose1/2, F Mouth_Happy, M Mouth_Happy,
+  M Mouth_Neutral. Verificado (herramientas/tanda19_verificar.py):
+  re-escaneo 0 objetivos restantes; 6/6 combos re-renderizados, diferencias
+  SOLO en las zonas objetivo (los 71+121 px "fuera de zona" de los combos
+  de hombre son la esquina de Base hombre, que está más a la izquierda;
+  zonas de verificación dibujadas para la cara de mujer); zooms 4x
+  antes/después revisados por Dani (nariz limpia, esquina suave, boca
+  Sorprendido intacta por orden de Stiven). NO se tocó: línea de la nariz,
+  fosa nasal fina (Nose1 22 px, Nose3 81 px), línea de la boca, cuña de la
+  comisura propia de cada boca, línea de la barbilla. PENDIENTE: subir a
+  GitHub + Drive cuando Stiven lo ordene (10 archivos). Reporte:
+  diagnostico_usuario/lunares_boca_nariz/ (escaneo, composites por
+  boca/nariz, combos_video/ y combos_video_postfix/ con zooms 4x,
+  antes_despues_nariz_05.png y antes_despues_boca_05.png).**
+- **Tanda 19b (CAUSA RAÍZ de los puntos café en bocas) TERMINADA 2026-11-23
+  ~09:40: orden de Stiven («encuéntrame como sea la causa raíz... si no,
+  seguirá apareciendo en nuevos combos»). Causa raíz probada: la capa Base
+  trae una "BOCA FANTASMA" — restos de la boca original que quedó en la
+  cara al separar en capas: una línea de boca rota en segmentos, manchas
+  de sombra del labio y (hombre) un bloque gris manchado en la esquina de
+  la boca, justo donde va la boca real. Cada render superpone la boca real
+  sobre esa fantasma y los pedacitos rotos se leen como puntos/lunares
+  café. Está en Base → aparece en TODOS los combos de ese sexo, con
+  cualquier boca y nariz → por eso seguían apareciendo en combos nuevos.
+  La Tanda 19 no la vio porque solo buscaba píxeles casi negros (gris<100);
+  la fantasma es marrón medio (gris 100-205). Prueba: render de las 24
+  bocas×narices (271 clusters café, los mismos en todos los combos, todos
+  con origen en Base) + zoom de Base sola mostrando la línea fantasma y el
+  bloque gris. Fix (herramientas/tanda19b_fix_fantasma.py + _v2.py, snapshot
+  versiones/2026-11-23_tanda19b-antes-fantasma/): v1 inpaint con piel
+  (F 433 px + mezcla 342 px; M 680 px + mezcla 214 px); v2 (núcleos oscuros
+  que la máscara café no incluía + relleno que salió marrón por vecinos
+  marrones) inpaint de todos los píxeles oscuros + mezcla 80% hacia piel
+  de mejilla (F 330 px, M 1007 px). Solo cambian las 2 capas Base
+  (F md5 f5ba606a35fe5bfcf8a60c40d3086412, M md5 2368d4e27918ecf748149de8a750407b).
+  Lección: el assert «todos los objetivos cambian» era demasiado estricto
+  (un píxel objetivo puede quedar igual tras el inpaint); el correcto es
+  «nada cambia fuera de los objetivos». Lección 2: los píxeles RGB (0,0,0)
+  con alfa 0 son transparentes y NO se ven en el render (la sonda inicial
+  los contó como líneas negras). Verificado
+  (herramientas/tanda19b_verificar.py): Base sola compuesta = piel limpia,
+  fantasma desaparecida; 6/6 combos del vídeo re-renderizados con recetas
+  completas, diferencias SOLO en las zonas objetivo (0 px fuera); las capas
+  Mouth son líneas finas limpias (la punta de la boca Neutral es la comisura
+  del labio, diseño). Quedan solo sombras suaves (medianas ~214-226, casi
+  piel), sombreado normal, no lunares. PENDIENTE: subir a GitHub + Drive
+  junto con la Tanda 19 (las 2 Base ya incluyen los cambios de T19; total
+  10 archivos) cuando Stiven lo ordene. Reporte:
+  diagnostico_usuario/lunares_boca_nariz/causa_raiz/ (sonda 24 combos,
+  zooms Base sola antes/después, combos post-19b).**
