@@ -1068,9 +1068,54 @@
   lum_std 17-25). Los otros 50 variantes no cambian.
 - Verificación: los 2 combos re-renderizados y revisados por Dani a ojo
   (nariz limpia con sombra suave, frente limpia, iris Gris uniforme).
-  PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene (las capas
-  tocadas ya estaban en los 23 del súper método; se suman motor.py y las
-  10 variantes Gray).
+- **SUBIDO 2026-11-23 ~16:26 (Stiven: «Sí, súbelo a GitHub y Drive»):**
+  GitHub commit `ea0d2adc78a51bc5c270b82c912e6b5f254d3bd6` (192 archivos,
+  192/192 blobs verificados) + release
+  `v2026-11-23-supermetodo-ribete-tanda20` (id 456011728, descripción
+  completa con los 3 bloques de cambios) + ZIP
+  `supermetodo-ribete-tanda20_2026-11-23.zip` (34,5 MB, 42 archivos,
+  asset id 784582982). Drive/Unity: 34/34 archivos subidos por ID y
+  verificados por md5 (24 capas + 10 variantes Gray). **GitHub =
+  Drive/Unity = súper método + ribete + Tanda 20.**
+
+## 2026-11-23 — TANDA 21 (4 capturas nuevas de Stiven, revisión POR CAPA, zooms 7x)
+- Stiven (2026-11-23 ~16:32) envió 4 capturas (todas mujer + O3 Blue
+  Hoodie) y ordenó: buen método (combo de métodos + Playwright + lupas
+  + zooms casi al 700%), por capas, no por combos. Ejecutado por
+  coordinador con 2 analistas; verificado por Dani a ojo en los 4
+  renders finales + md5.
+- **Female/Outfit3 (9.703 px + 276 + 124 + 456 + 51):** láminas
+  triangulares oscuras en el borde izquierdo del pecho (3 grandes + 2
+  pequeñas + 8 motitas) — conectadas pero anómalas (O1/O2 y O3 de hombre
+  son lisos en esa zona); recortadas a envolvente suave. Hilo fino
+  vertical colgando (C2, 276 px), gancho/púa sobre el hombro (C1,
+  124 px), franja pálida del ribete recoloreado en el cuello (C3/C4,
+  456 px: recolorear no funcionaba, se borró), franja lima brillante
+  de 1 px junto al pelo (C2, 51 px, defringe).
+- **Female/Hair8_Front (6.512 + 102 + 1.226 borrados + 964 dibujados +
+  94):** 3 líneas desprendidas en cuello/pecho + restos
+  semi-transparentes; piquito + motita en el cuello; QUIEBRO en ángulo
+  recto del mechón principal (banda horizontal con 2 esquinas de 90°):
+  borrada la banda y redibujada diagonal suave.
+- **Female/Hair9_Front (3.440 + 1.230 borrados + 964 dibujados):** 2
+  líneas desprendidas en el pecho + motita; mismo quiebro que H8 (misma
+  posición, plantilla compartida), mismo arreglo.
+- **Female/Hair2_Front (36 px):** muesca en el borde del pelo sobre el
+  ojo (C3) + motitas en la frente; rellenado con color de pelo.
+- **Female/Hair2_Back (3.243 px):** 6 hilos desprendidos latentes en
+  cuello/pecho (invisibles en el render actual, tapados por Base/O3).
+- Total: ~26.500 px corregidos + 1.928 px dibujados (2 diagonales).
+  5 capas. Snapshot `versiones/2026-11-23_tanda21-antes/`.
+- Diseño NO tocado: parche pálido del cuello interior de la camisa
+  (O3); mechones principales de H8/H9; hebra larga de Hair2_Front
+  sobre el hombro derecho (C4, 4.189 px, conectada — Stiven la marcó;
+  si insiste, se borra el tramo); penacho del hombro y solapa de O3.
+- Residual menor: mechón punteado de Hair9_Front (x300-310, y691-880,
+  hebra rota en 3 trozos; no se pudo unir).
+- Verificación: 4 capturas re-renderizadas post-fix en motor y en
+  navegador real (Playwright); diff pre/post solo en pecho/cuello/
+  hombro/frente, 0 px en la cara. PENDIENTE subir a GitHub/Drive cuando
+  Stiven lo ordene (5 capas + scripts).
 - Script nuevo `herramientas/grabar_video.js` (reutilizable): graba el
   creador con Playwright; opciones --duracion, --segundos, --boca
   (sorprendido|aleatorio), --sexos, --salida, --url. Reemplaza a
