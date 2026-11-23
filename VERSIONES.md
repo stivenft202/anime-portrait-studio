@@ -939,12 +939,41 @@
   programa real: píxeles de la boca dif media 0.12 (F) / 0.15 (M) contra el
   render del navegador (idéntico).
 - **SUBIDA A GITHUB (sin Unity/Drive, por orden de Stiven):** push del árbol
-  completo + release de la versión con el archivo nuevo
-  `boca-sorprendido-R_2026-11-23.zip` (las 2 capas nuevas + NOTA.txt) —
-  cada nueva versión es un nuevo archivo en GitHub.
+  completo (179 archivos, 179/179 blobs verificados + 2 bocas por
+  raw.githubusercontent.com md5) commit
+  `a5f709a78a51f506ad466936c5495847ae9696ae`
+  (https://github.com/stivenft202/anime-portrait-studio/commit/a5f709a78a51f506ad466936c5495847ae9696ae)
+  + release `v2026-11-23-boca-sorprendido-R` con el archivo nuevo
+  `boca-sorprendido-R_2026-11-23.zip` (las 2 capas nuevas + NOTA.txt, 10.378
+  bytes) — cada nueva versión es un nuevo archivo en GitHub:
+  https://github.com/stivenft202/anime-portrait-studio/releases/tag/v2026-11-23-boca-sorprendido-R
 - Script nuevo `herramientas/grabar_video.js` (reutilizable): graba el
   creador con Playwright; opciones --duracion, --segundos, --boca
   (sorprendido|aleatorio), --sexos, --salida, --url. Reemplaza a
   grabar_video_ciclo.js / grabar_video_randomize.js para las próximas
   grabaciones. Vídeo de 40 s con esta versión (randomize hombre y mujer,
   siempre Sorprendido) grabado con él.
+
+## 2026-11-23 — Rayita suelta en Female Hair1_Front (vista por Stiven en el vídeo Sorprendido)
+- Stiven vio el vídeo de 40 s (versión R) y reportó 12:12: «perfecto, solo
+  vi un error en el primer psj mostrado en el video, la chica tiene una
+  pequeña rayita en la boca sorprendida, arreglalo y fijate si aparece en
+  mas combos».
+- Causa: NO era la boca R. Es un trazo fino horizontal DESPRENDIDO de la
+  capa Female Hair1_Front (19 px, x380-392, y787-789), que flota sobre la
+  piel justo a la izquierda de la boca y se lee como una rayita pegada a
+  ella. Confirmado por medición por capa (Base, Nose1, Hair1_Back y la
+  boca R limpias en esa zona) y por el mapa de alfa (la rayita está
+  separada de la masa del pelo por píxeles transparentes, sin puente).
+- Alcance: SOLO Female Hair1_Front la tiene (escaneo de las 12 frentes de
+  pelo de mujer + 4 de hombre en la zona de la boca: ningún otro). Aparece
+  en TODOS los combos de mujer con H1 (Long Straight), con cualquier
+  boca/nariz/ropa: 225 combos de piezas. En el vídeo salía en 2 combos
+  (apertura F H1 O1 E1 N1 M5 y azar 3 F H1 O3 E3 N2 M5).
+- Fix (`herramientas/rayita_fix_H1.py`, snapshot previo en
+  `versiones/2026-11-23_rayita-H1-antes/`): borrados los 19 px (alfa=0).
+  Hair1_Front F md5 69644a81... → 94140fdb...
+- Verificación: render en motor pre-fix (snapshot) vs post-fix del primer
+  combo: cambian EXACTAMENTE 19 px, todos dentro de la rayita, nada más.
+  Render en el navegador (copia de prueba) del primer combo: boca limpia,
+  sin rayita. PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene.

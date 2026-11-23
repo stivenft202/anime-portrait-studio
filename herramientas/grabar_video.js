@@ -63,7 +63,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const forzarBoca = async () => {
     if (BOCA !== 'sorprendido') return;
     await page.evaluate(() => {
-      R.boca = R.sexo === 'F' ? 4 : 2;
+      // R.sexo es "Female"/"Male" (palabra completa), NO "F"/"M".
+      R.boca = R.sexo === 'Female' ? 4 : 2;
       dibujar();
     });
   };
