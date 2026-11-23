@@ -749,8 +749,202 @@
   completas, diferencias SOLO en las zonas objetivo (0 px fuera); las capas
   Mouth son líneas finas limpias (la punta de la boca Neutral es la comisura
   del labio, diseño). Quedan solo sombras suaves (medianas ~214-226, casi
-  piel), sombreado normal, no lunares. PENDIENTE: subir a GitHub + Drive
-  junto con la Tanda 19 (las 2 Base ya incluyen los cambios de T19; total
-  10 archivos) cuando Stiven lo ordene. Reporte:
+  piel), sombreado normal, no lunares. **SUBIDO 2026-11-23 ~09:57 por orden
+  de Stiven («Sí, súbelo a GitHub y Drive»): GitHub commit
+  198603ccc722ab2ec9d89879fd6c057b4b755f3a (168 archivos, verificado 168/168
+  blobs + Base F/M por raw.githubusercontent.com) y Drive/Unity 10/10
+  verificado por md5 (las 2 Base + Nose1/2/3 F, Nose1/2 M, Mouth_Happy F/M,
+  Mouth_Neutral M). GitHub = Drive/Unity = T19 + T19b.** Reporte:
   diagnostico_usuario/lunares_boca_nariz/causa_raiz/ (sonda 24 combos,
   zooms Base sola antes/después, combos post-19b).**
+- **Ciclo 1 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,16 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames vistos
+  por Dani + renders motor de los 13 combos + escaneos a nivel de capa
+  (café y oscuro en Base/narices/bocas, agujeros interiores en prendas,
+  blue-cast en pelo) + comparación motor vs vídeo (dif media 8-14 = compresión
+  VP9 + alineación; clusters dif>60 máx 1510 px, todos en bordes de pelo o
+  del lienzo; ojo del combo 00 verificado a 4x, iris verde igual). Resultado:
+  0 ERRORES. Solo arte conocido (lavados de nariz, líneas de boca, óvalo
+  Sorprendido, sombras suaves de comisura, lavado marrón de nariz hombre,
+  motas de 1 px en prendas). Blue-cast 0 px. Nada que arreglar, nada que
+  subir. Reporte: diagnostico_usuario/ciclos/ciclo1/reporte.json.**
+- **Ciclo 2 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,16 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 14/14 retratos vistos
+  por Dani (13 frames + default, que solo se ve en vídeo t≈3,5) + renders
+  motor de los 13 combos + escaneos a nivel de capa (café y oscuro en
+  Base/narices/bocas, agujeros interiores en prendas, blue-cast en pelo) +
+  comparación motor vs vídeo con la geometría real del lienzo (552x736 en
+  (16,16): dif media 3,3-5,3; dif>60 total 6-170 px dispersos, 0 clusters
+  ≥100 px). Frame_00 y frame_01 muestran ambos el combo #1 (la extracción
+  t+1,5 cae en el límite del hold). Resultado: 0 ERRORES. Solo arte conocido
+  (lavados de nariz y puente nasal, lavado marrón de nariz hombre, línea de
+  mandíbula, ceja, comisura, óvalo Sorprendido, sombra suave del cuello +
+  ribete teñido con el color de la prenda, motas de 1 px en prendas).
+  Blue-cast 0 px. Nada que arreglar, nada que subir. Nota: la comparación
+  sin alinear (600x800 en (0,0), como en ciclo 1) infla la dif con clusters
+  falsos de ~12k px en bordes de pelo; no usarla. Reporte:
+  diagnostico_usuario/ciclos/ciclo2/reporte.json.**
+- **Ciclo 3 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,4 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames vistos
+  por Dani + default verificado aparte (t=3,5, dif 2,5) + renders motor de
+  los 13 combos + escaneos a nivel de capa (café y oscuro en Base/narices/
+  bocas, agujeros interiores en prendas, blue-cast en pelo) + comparación
+  motor vs vídeo con la geometría real del lienzo (552x736 en (16,16):
+  dif media 2,5-3,5; dif>60 total 2-173 px dispersos, mayor cluster 8 px;
+  13/13 frames con mejor match = su propio combo). La extracción a mitad
+  real del hold corrigió el problema del ciclo 2: frame_00 ya muestra el
+  default (no duplica el combo #1). Escaneos idénticos al ciclo 2 (capas
+  sin cambios desde T19b); Base F/M limpias, sin rastro de boca fantasma.
+  Resultado: 0 ERRORES. Solo arte conocido (lavados de nariz y puente
+  nasal, lavado marrón de nariz hombre, línea de mandíbula, ceja, comisura,
+  óvalo Sorprendido en 05 y 09, sombra suave del cuello + ribete teñido con
+  el color de la prenda, motas de 1 px en prendas). Sospechosos revisados a
+  4x y no arreglados (diseño): líneas rojizas de costura del hoodie en
+  03/05/12 = arte horneado de Outfit3 F (capa sola idéntica al render);
+  parche naranja del cuello en 12 = ribete teñido con OC16; banda marrón
+  del pecho en 04 = sombra de la abertura de la camisa de Outfit2. Blue-cast
+  0 px. Nada que arreglar, nada que subir. Reporte:
+  diagnostico_usuario/ciclos/ciclo3/reporte.json.**
+- **Ciclo 4 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,28 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames vistos
+  por Dani + renders motor de los 13 combos + escaneos a nivel de capa
+  (café y oscuro en Base/narices/bocas, agujeros interiores en prendas,
+  blue-cast en pelo) + comparación motor vs vídeo con la geometría real del
+  lienzo (552x736 en (16,16): dif media 2,3-3,6; dif>60 total 1-75 px
+  dispersos, mayor cluster coherente 5 px; 13/13 frames con mejor match =
+  su propio combo). Escaneos idénticos al ciclo 3 (capas sin cambios desde
+  T19b); Base F/M limpias, sin rastro de boca fantasma. Blue-cast 0 px en
+  los 10 pelos usados. Resultado: 0 ERRORES. Solo arte conocido (lavados de
+  nariz y puente nasal, lavado marrón de nariz hombre, línea de mandíbula,
+  ceja, comisura, óvalo Sorprendido en 02/08/09/10, sombra suave del cuello
+  + ribete teñido con el color de la prenda, motas de 1 px en prendas).
+  Sospechosos revisados a 3x motor vs vídeo y no arreglados (diseño):
+  parche naranja del cuello en 03 = ribete teñido con OC16, parche rosa
+  del cuello en 12 = ribete teñido con OC17, línea fina vertical en el
+  cuello/camisa de 12 = costura de la camisa de Outfit2, motitas de 1 px
+  en el cuello en 04, punta de hebra bajo la barbilla en 01 = extremo de
+  hebra de Hair7, líneas de costura del hoodie en 03/05. Nada que arreglar,
+  nada que subir. Reporte:
+  diagnostico_usuario/ciclos/ciclo4/reporte.json.**
+- **Ciclo 5 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,48 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames vistos
+  por Dani + renders motor de los 13 combos + escaneos a nivel de capa
+  (café y oscuro en Base/narices/bocas, agujeros interiores en prendas,
+  blue-cast en pelo) + comparación motor vs vídeo con la geometría real del
+  lienzo (552x736 en (16,16): dif media 2,5-3,5; dif>60 total 1-103 px
+  dispersos, mayor cluster coherente 7 px; 13/13 frames con mejor match =
+  su propio combo). Escaneos idénticos al ciclo 4 (capas sin cambios desde
+  T19b); Base F/M limpias, sin rastro de boca fantasma (md5 f5ba606a /
+  2368d4e2). Blue-cast 0 px en los 9 pelos usados. Resultado: 0 ERRORES.
+  Solo arte conocido (lavados de nariz y puente nasal, lavado marrón de
+  nariz hombre, línea de mandíbula, ceja, comisura, óvalo Sorprendido en
+  02/04/06/08/09/11, sombra suave del cuello + ribete teñido con el color
+  de la prenda, motas de 1 px en prendas). Sospechosos revisados a 4x motor
+  vs vídeo y no arreglados (diseño): parche lila/rosa del cuello en 05
+  (OC22) y 12 (OC20) y parche pálido en 11 (OC3) = ribete teñido con OC;
+  cluster horizontal de 7 px en (168-174, 382) en 07/09/10 = borde
+  barba completa/piel, anti-aliasing + VP9, idéntico en motor a 4x;
+  líneas de costura del hoodie en 01/02/03/05/09/10/11/12. Pelo rizado
+  F H12 (04) y ojos E4 (11) vistos por primera vez en un ciclo, limpios.
+  Nada que arreglar, nada que subir. Reporte:
+  diagnostico_usuario/ciclos/ciclo5/reporte.json.**
+- **Ciclo 6 de 7 (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces grabar
+  vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,36 s, 13 combos
+  (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames vistos
+  por Dani + renders motor de los 13 combos + escaneos a nivel de capa
+  (café y oscuro en Base/narices/bocas, agujeros interiores en prendas,
+  blue-cast en pelo) + comparación motor vs vídeo con la geometría real del
+  lienzo (552x736 en (16,16): dif media 2,5-3,5; dif>60 total 1-87 px
+  dispersos, mayor cluster coherente 6 px; 13/13 frames con mejor match =
+  su propio combo). Escaneos idénticos al ciclo 5 (capas sin cambios desde
+  T19b); Base F/M limpias, sin rastro de boca fantasma (md5 f5ba606a /
+  2368d4e2). Blue-cast 0 px en los 9 pelos usados. Resultado: 0 ERRORES.
+  Solo arte conocido (lavados de nariz y puente nasal, lavado marrón de
+  nariz hombre, línea de mandíbula, ceja, comisura, óvalo Sorprendido en
+  01/10/12, sombra suave del cuello + ribete teñido con el color de la
+  prenda, motas de 1 px en prendas). Sospechosos revisados a 4x motor
+  vs vídeo y no arreglados (diseño): parche rosa del cuello en 04
+  (OC17) y parche pálido verdoso en 11 (OC12) y parche amarillento en 12
+  (OC15) = ribete teñido con OC; cluster de 6 px en (168-173, 382) en 08
+  = borde barba completa/piel, anti-aliasing + VP9, idéntico en motor a
+  4x; cluster de 3 px en (152-153, 345-346) en 07 y 10 = borde del
+  bigote, idéntico en motor a 4x; cluster de 4 px en (242-245, 734) en
+  11 = nudo de la trenza en el borde inferior, idéntico en motor a 4x;
+  líneas de costura del hoodie en 02/04/06/08/11. Pelo F H7 Long Braid
+  (11) y F H8 Double Buns (12) vistos por primera vez en un ciclo,
+  limpios. Nada que arreglar, nada que subir. Reporte:
+  diagnostico_usuario/ciclos/ciclo6/reporte.json.**
+- **Ciclo 7 de 7 — ÚLTIMO (orden de Stiven 2026-11-23 ~10:07: repetir 7 veces
+  grabar vídeo 40 s + revisar + arreglar + actualizar): vídeo de 41,32 s,
+  13 combos (5 mujer + 5 hombre + 2 mujer + default). Revisión: 13/13 frames
+  vistos por Dani + renders motor de los 13 combos + escaneos a nivel de capa
+  (café y oscuro en Base/narices/bocas, agujeros interiores en prendas,
+  blue-cast en pelo) + comparación motor vs vídeo con la geometría real del
+  lienzo (552x736 en (16,16): dif media 2,4-3,7; dif>60 total 0-80 px
+  dispersos, mayor cluster coherente 2 px; 13/13 frames con mejor match =
+  su propio combo). Escaneos idénticos al ciclo 6 (capas sin cambios desde
+  T19b); Base F/M limpias, sin rastro de boca fantasma (md5 f5ba606a /
+  2368d4e2). Blue-cast 0 px en los 10 pelos usados. Resultado: 0 ERRORES.
+  Solo arte conocido (lavados de nariz y puente nasal, lavado marrón de nariz
+  hombre, línea de mandíbula, ceja, comisura, óvalo Sorprendido en 07/10/11/12,
+  sombra suave del cuello + ribete teñido con el color de la prenda, motas de
+  1 px en prendas). Sospechosos revisados a 4x motor vs vídeo y no arreglados
+  (diseño): mancha rosada suave bajo el ojo en 11 y 12 = sombreado suave de
+  la mejilla, idéntica en motor y vídeo; punto oscuro en la oreja en 06/08/10
+  = ojo lejano entre hebras de pelo / detalle de la oreja de Base M, idéntico
+  en motor a 4x; parche lavanda del cuello en 04 (OC21) y parche verdoso en
+  05 (OC3) y parche amarillento en 12 (OC15) = ribete teñido con OC; líneas
+  de costura del hoodie en 01/03/05. **CICLO DE REVISIÓN POR VÍDEO COMPLETO:
+  7/7 ciclos, 0 errores en los 7. Nada que arreglar, nada que subir.**
+  Reporte: diagnostico_usuario/ciclos/ciclo7/reporte.json.**
+
+## 2026-11-23 — Boca Sorprendido nueva (variante R, de la referencia de Stiven)
+- Stiven reabrió la boca Sorprendido 2026-11-23 10:56: el «circulito» del vídeo
+  del ciclo 7 era la boca misma (29x37 px, óvalo rojo). Muestras A/B (vectores)
+  rechazadas por parecerse entre sí; referencias de internet; 4 caras
+  generadas (mujer círculo, mujer D con dientes, hombre grito, hombre
+  dientecito + lengua). Stiven eligió la boca del hombre 2 (dientecito +
+  lengua) y confirmó que cambiarla es solo cambiar la capa.
+- Variante C (dibujada a mano) RECHAZADA por Stiven 11:26 («muy fea muy mal
+  dibujada») y ordenó calcar con Playwright. Variante T (calco de la boca 3/4
+  pegado tal cual) RECHAZADA 11:36: se veía como si comiera, con cachetes
+  grandes — la boca 3/4 es ancha y el rostro del programa es de perfil.
+  Orden: varios métodos con y sin Playwright hasta que quede lo más fiel
+  posible, sin entregar nada hasta cumplirlo; adaptar 3/4 a 2D de perfil.
+- Variante B (calco de perfil generado, 33x42, diente + lengua): cumplía los
+  4 criterios y se presentó a Stiven 11:44, pero antes de que respondiera
+  mandó una referencia MUCHO MEJOR (REF_BOCA_ANIME_2.png, chico de perfil
+  puro mirando a la izquierda, boca en D con interior oscuro + lengua rosa,
+  sin diente) y ordenó usar esa.
+- **Variante R (APLICADA): calco de la boca de REF_BOCA_ANIME_2.png**
+  (bbox x321-406, y616-716; mismo método que B: solo píxeles oscuros
+  lum<110, dilatar 1, componente de mayor solape, rellenar agujeros).
+  Boca calcada 84x79 px, escalada a 45x42 px (más ancha que B porque la
+  referencia es un jadeo bien abierto). Capas Female_R_layer.png
+  (md5 95c8230615335c880c202750e678caa7) y Male_R_layer.png
+  (md5 377331947a8178aa56148732189feee7). Verificada en el navegador
+  (copia de prueba, renders F H1 O1 E1 N1 M5 / M H1 O1 E1 N1 M3 + zooms 4x):
+  se lee como jadeo sorprendido en perfil, cachete plano, sin «comer».
+  Presentada a Stiven 11:48; **aprobada 11:52 («aplicala en hombre y mujer»)**.
+- Aplicación: snapshot de las bocas viejas en
+  `versiones/2026-11-23_boca-sorprendido-R-antes/` (óvalo original:
+  F 250255f58fbc405784936f70659fac30, M 304c56db4cf2b9d86b351948e00e85c9).
+  Capas R copiadas a `version-linux/assets/{Female,Male}/Mouth_Surprised.png`
+  (md5 verificados iguales a las capas R). Verificación en motor con el
+  programa real: píxeles de la boca dif media 0.12 (F) / 0.15 (M) contra el
+  render del navegador (idéntico).
+- **SUBIDA A GITHUB (sin Unity/Drive, por orden de Stiven):** push del árbol
+  completo + release de la versión con el archivo nuevo
+  `boca-sorprendido-R_2026-11-23.zip` (las 2 capas nuevas + NOTA.txt) —
+  cada nueva versión es un nuevo archivo en GitHub.
+- Script nuevo `herramientas/grabar_video.js` (reutilizable): graba el
+  creador con Playwright; opciones --duracion, --segundos, --boca
+  (sorprendido|aleatorio), --sexos, --salida, --url. Reemplaza a
+  grabar_video_ciclo.js / grabar_video_randomize.js para las próximas
+  grabaciones. Vídeo de 40 s con esta versión (randomize hombre y mujer,
+  siempre Sorprendido) grabado con él.
