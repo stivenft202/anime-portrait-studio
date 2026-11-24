@@ -1114,8 +1114,59 @@
   hebra rota en 3 trozos; no se pudo unir).
 - Verificación: 4 capturas re-renderizadas post-fix en motor y en
   navegador real (Playwright); diff pre/post solo en pecho/cuello/
-  hombro/frente, 0 px en la cara. PENDIENTE subir a GitHub/Drive cuando
-  Stiven lo ordene (5 capas + scripts).
+  hombro/frente, 0 px en la cara. **SUBIDO 2026-11-23 ~17:24 (Stiven:
+  «Sí, súbelo a GitHub y Drive»):** GitHub commit
+  `0aa61168fd19d13dee4871b54c2752743ed714a1` (200 archivos, 200/200
+  blobs verificados; Outfit3 también verificado por
+  raw.githubusercontent.com) + release `v2026-11-23-tanda21`
+  (id 456066615, descripción completa) + ZIP
+  `tanda21_2026-11-23.zip` (8,4 MB, 5 capas + NOTA.txt, asset id
+  784760761). Drive/Unity: 5/5 subidas por ID y verificadas por
+  re-descarga md5. **GitHub = Drive/Unity = Tanda 21.**
+
+## 2026-11-23 — TANDA 22 (5 capturas nuevas de Stiven, revisión POR CAPA, zooms 10x)
+- Stiven (2026-11-23 ~18:45) envió 5 capturas y ordenó el mismo método
+  que la Tanda 21 pero con zooms casi al 1000%. Ejecutado por
+  coordinador con 2 analistas; verificado por Dani a ojo en los 5
+  renders finales + md5.
+- **Eyes ×5 (795 px):** fragmento pálido DESPRENDIDO de 159 px en la
+  punta de la nariz, idéntico en las 5 capas de ojos — NO era Nose1 ni
+  Base (ablación: sin la capa de ojos → 0 px pálidos). Borrado en las 5.
+- **Hair10_Front (28.621 px):** HALO (clase nueva): franja
+  semitransparente clara en todo el borde del pelo, 53.513 px — defringe
+  31.085 px. Huecos en la línea del pelo que dejaban ver piel (425 px:
+  eran pelo semitransparente pálido, no transparentes — máscara
+  alfa<200 + Laplace + oscurecido de borde 279 px). Motitas claras en
+  el moño (698 px oscurecidas + 180 de fragmentos).
+- **Hair9_Front (11.435 px):** HALO 31.422 px — defringe 11.987 px.
+  Hebra punteada vertical (resto de T21, ~200 px) borrada; fragmento
+  curvo desprendido (150 px); 30 componentes desprendidos (489 px).
+- **Hair7_Front (804 px):** gota en el cuello (hebra que se hincha a
+  10-13 px × 56 px, 668 px) + punto desprendido (38 px) + guión en
+  hueco de trenza y micros (98 px).
+- **Hair2_Front (1.656 px):** fragmentos junto a la oreja (231 px) y
+  en la línea del pelo (173 px) + motitas (84 px) + defringe (1.203 px).
+- **Hair2_Back (6.849 px):** halo 11.853 px — defringe 7.026 px.
+- **Outfit3 (4.469 px visibles):** guión desprendido en el pecho
+  (75 px) + pico triangular (1.056 px); hilo colgando en el hombro
+  (1.333 px); aleta triangular conectada en el pecho izquierdo (612 px,
+  T21 la clasificó diseño — Stiven la volvió a marcar → defecto);
+  solapa fina conectada en el hombro derecho (689 px, mismo caso);
+  remanente del ribete en el cuello (466 px: guiones naranja-rojo +
+  borde punteado).
+- **Outfit2 (172 px):** arco flotante en el cuello (57 px, también en
+  O3) + curva clara (115 px).
+- **Nose1 (3 px):** 3 px oscuros desprendidos bajo la punta.
+  **Eyes_Sad (41 px):** guión sobre la ceja interior.
+- Total: 54.845 px visibles corregidos. 13 capas. Snapshot
+  `versiones/2026-11-23_tanda22-antes/`. motor.py NO tocado (iris
+  idénticos pre/post).
+- Diseño NO tocado: rim-light fino en el contorno de H9 (brillo
+  dibujado); hebra larga de Hair2_Front en el hombro (T21); hebras
+  largas de H7/H10/H9; guión rojizo de Outfit2 (parece costura);
+  mancha café del cuello interior de O3/O2.
+- PENDIENTE subir a GitHub/Drive cuando Stiven lo ordene (13 capas +
+  scripts).
 - Script nuevo `herramientas/grabar_video.js` (reutilizable): graba el
   creador con Playwright; opciones --duracion, --segundos, --boca
   (sorprendido|aleatorio), --sexos, --salida, --url. Reemplaza a
@@ -1151,3 +1202,44 @@
   v2026-11-23-rayita-H1 (id 455781891) con rayita-H1_2026-11-23.zip (asset
   id 783950284, 2.029.843 bytes) y descripción completa de los cambios;
   Drive/Unity 1/1 verificado por md5. GitHub = Drive/Unity = rayita.**
+
+## 2026-11-23 — Cuadritos de color en Unity (orden de Stiven)
+- Stiven 20:16: en Unity NO le salen los cuadritos de colores que ve en
+  mis vídeos; en Unity el color solo se elige con las flechas < >. Y sí
+  descargó y esperó el último sync de Drive. Tenía razón en lo que veía:
+  los cuadritos solo existían en el creador web (versión Linux,
+  `index.html`, `COLOR_FILAS`), nunca en Unity. En Unity
+  `PortraitCreator.cs` construía cada fila solo con < y > (así dice su
+  propio comentario). El sync de Drive funcionaba bien: tenía las últimas
+  capas (Tanda 22); ningún sync iba a traer los cuadritos porque no
+  existían en el código de Unity.
+- Fix (`PortraitCreator.cs`, snapshot previo en
+  `versiones/2026-11-23_cuadritos-antes/`, md5 antes 046dc538... = blob
+  GitHub 65fe7f34...): las 4 categorías de color (EYE COLOR, HAIR COLOR,
+  SKIN TONE, OUTFIT COLOR) ahora tienen una fila de cuadritos clicables
+  justo debajo de su fila, con los colores de la paleta
+  (`PortraitPalette`, `NamedColor.name` + `.color`). Un clic elige el
+  color directo (`SelectColor`, nuevo método público: fija el índice,
+  `ApplyCurrent()` + `RefreshUI()`). El cuadrito seleccionado lleva un
+  borde blanco (`Outline`, toggled en `RefreshUI()`); los demás sin
+  borde. Los botones < > siguen funcionando igual.
+- Layout: las filas pasaron de 0.044 a 0.038 de alto (pitch 0.052 →
+  0.044) y cada fila de cuadritos mide 0.026, para que las 4 filas
+  nuevas quepan sobre los botones de acción. Verificado por simulación:
+  filas 0.868 → 0.306, botones de acción 0.294 → 0.060, texto del combo
+  0.008–0.055 (sin solapes). Ancho por cuadrito: 24 colores ≈ 20 px,
+  7 colores ≈ 74 px, 4 colores ≈ 131 px (panel de 576 px a 1920×1080).
+  Los cuadritos no tienen transición de color del botón
+  (`Selectable.Transition.None`), así que siempre muestran el color
+  exacto de la paleta. Si la paleta es null no se construyen cuadritos
+  (seguro). Llaves/paréntesis/corchetes balanceados (85/85, 316/316,
+  51/51). NO se pudo compilar en Unity aquí (no hay Unity ni csc/mcs
+  en Linux): Stiven lo prueba en su PC y dice si se ve bien.
+- SUBIDO 2026-11-23 ~20:20 por orden de Stiven («Sí, pon los cuadritos
+  en Unity»): Drive/Unity `PortraitCreator.cs` (id
+  1WJmiDhcw5Jvjp_aFIs9z7jjAjeNV_mTR) reemplazado y verificado por
+  re-descarga md5 5bca0e9e... GitHub: archivo actualizado por PUT
+  (commit, verificado por raw md5) + release v2026-11-23-cuadritos-unity
+  con el .cs como asset. GitHub = Drive/Unity = cuadritos. NOTA: la
+  Tanda 22 sigue PENDIENTE de subir (Stiven no ha respondido al widget);
+  este cambio NO incluye sus 13 capas.
