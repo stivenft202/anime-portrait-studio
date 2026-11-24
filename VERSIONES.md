@@ -1429,3 +1429,20 @@
   (comparaciones `muestra/comp_v112_v113_G3/G4/G5.png`).
   Nueva capa `Female/Hair9_Front_Elderly.png` md5
   a3ff22966242131a2e63ef8f4a8d8f9a.
+
+## 2026-11-24 — Asistente Tools con edad (PortraitSetupAssistant) [RAMA edad-ancianos, no subido aún]
+- El menú Tools > Portrait Kit > Create Data and Demo Scene NO conocía
+  las capas ancianas (ni las importaba como sprites ni las asignaba a
+  los datos), así que correrlo dejaba los campos de anciano vacíos y el
+  selector de edad caía al pelo joven por el fallback. Arreglo:
+  `unity/Editor/PortraitSetupAssistant.cs` (nuevo en la rama; el
+  original vive en `diagnostico_usuario/unity/`):
+  AllTexturePaths suma Base_Elderly, HairN_Back/Front_Elderly y
+  FacialHairN_Elderly; CharacterSprites gana baseElderlySprite,
+  hairBacksElderly, hairFrontsElderly y facialHairsElderly (opcionales,
+  FUERA de Complete: los 6 Back transparentes de mujer H5-H10 no se
+  envían y un hueco nulo no aborta el setup); LoadCharacterSprites los
+  carga (nulo si falta) y CreateOrUpdateCharacter los asigna a
+  PortraitData (baseElderlySprite, hairs[i].back/frontElderlySprite,
+  facialHairsElderly). Re-correr el menú es seguro (los datos se
+  actualizan en su sitio; la paleta no se toca). NO compilado aquí.
