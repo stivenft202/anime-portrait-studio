@@ -1238,8 +1238,11 @@
 - SUBIDO 2026-11-23 ~20:20 por orden de Stiven («Sí, pon los cuadritos
   en Unity»): Drive/Unity `PortraitCreator.cs` (id
   1WJmiDhcw5Jvjp_aFIs9z7jjAjeNV_mTR) reemplazado y verificado por
-  re-descarga md5 5bca0e9e... GitHub: archivo actualizado por PUT
-  (commit, verificado por raw md5) + release v2026-11-23-cuadritos-unity
-  con el .cs como asset. GitHub = Drive/Unity = cuadritos. NOTA: la
+  re-descarga md5 5bca0e9e... GitHub: `PortraitCreator.cs` actualizado
+  por PUT (commit 254e792f, blob fce8a6c2..., verificado por raw md5
+  5bca0e9e...) y `VERSIONES.md` (commit 4e9109d8) + release
+  v2026-11-23-cuadritos-unity (id 456194356) con descripción completa y
+  asset cuadritos-unity_2026-11-23.zip (id 785223076, 8.072 bytes).
+  GitHub = Drive/Unity = cuadritos. NOTA: la
   Tanda 22 sigue PENDIENTE de subir (Stiven no ha respondido al widget);
   este cambio NO incluye sus 13 capas.
