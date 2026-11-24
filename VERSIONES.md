@@ -1246,3 +1246,76 @@
   GitHub = Drive/Unity = cuadritos. NOTA: la
   Tanda 22 sigue PENDIENTE de subir (Stiven no ha respondido al widget);
   este cambio NO incluye sus 13 capas.
+
+## 2026-11-23 — Candados por rasgo + Reset to Default (EN CURSO, no subido)
+- Orden de Stiven 21:22: agregar selectores individuales (candado) a
+  los rasgos para que Randomize no toque los fijos, solo los demás; y
+  21:23 otro botón general "restaurar a predeterminado" para dejar todo
+  sin selectores. 21:24: elegir yo el mejor texto, redacción y estética.
+- WEB (`version-linux/index.html`, verificado en navegador con
+  `herramientas/probar_candados.js`): cada fila tiene un botón candado
+  (🔒 fijado / 🔓 libre) a la derecha; el rasgo fijado se ve en dorado y
+  su candado con fondo dorado. Randomize salta los fijos (verificado:
+  HAIR y OUTFIT fijos no cambiaron en 3 Randomize, los demás sí).
+  Botón "Reset to Default" bajo Randomize: vuelve a la mujer por
+  defecto (F H1 O1 E1 N1 M1, colores 1) y quita TODOS los candados
+  (verificado: código F H1... y 0 candados activos). Los candados NO
+  forman parte de la receta (no se guardan en el JSON). De paso se
+  arregló un bug: el handler genérico de botones reasignaba el onclick
+  de los cuadritos de color y al hacerles clic se rompía (FILAS.find
+  daba undefined); ahora solo los botones < > llevan ese handler y el
+  clic en un cuadrito SÍ cambia el color (verificado: Chestnut).
+- UNITY (`PortraitCreator.cs`): botón PIN por fila (la fuente legacy de
+  Unity no tiene el emoji 🔒, así que dice PIN y se pone dorado al
+  fijar; el valor también se pone dorado). `Randomize()` salta los
+  fijos; `ToggleLock(categoría)`; `ResetToDefault()` (vuelve a Female
+  por defecto y quita todos los candados). Acciones ahora 6 (se agregó
+  Reset to Default, botones un poco más bajos: 0.034, pitch 0.039;
+  último botón termina en 0.065, sin solape con el combo). Llaves/
+  paréntesis/corchetes balanceados (90/90, 351/351, 74/74). NO
+  compilado en Unity aquí: Stiven lo prueba en su PC.
+- PENDIENTE subir junto con la edad (misma versión nueva) cuando
+  Stiven apruebe la muestra de edad. NO se sube nada todavía.
+
+## 2026-11-24 — Edad como selector (Joven / Anciano) + pelos grises v11.1 [RAMA edad-ancianos, no main]
+- Orden de Stiven 2026-11-23 21:21: edad como selector, sin tocar la
+  geometría de la cara, arrugas para ancianos; y 2026-11-24 09:41: NO
+  adultos (solo Joven/Anciano) y pelo anciano TOTALMENTE gris. Rama
+  `edad-ancianos` creada desde main `de3d8e7f`; esta versión vive SOLO
+  en esa rama. Incluye la Tanda 22 (13 capas) y los candados + Reset
+  (arriba), porque los grises v11 se derivaron de las capas Tanda 22.
+- Selector AGE (primera fila, con candado; valor en inglés Young /
+  Elderly). Anciano = Base anciana v9 (marcas tono piel, nunca grises
+  ni negras) + pelos grises v11.1 de los 16 peinados; tinte de pelo
+  anulado con Anciano (el Silver no grisaba). Receta `edad` 0/1 y
+  código `AG1` (Joven) / `AG2` (Anciano) al final. Randomize incluye
+  la edad salvo candado; Reset vuelve a Joven y quita los candados.
+- Método gris dinámico v11.1 (`herramientas/pelo_gris_dinamico.py`,
+  10 pasos A–J): curva de remapeo de luminancia + streamlines largos
+  (método v8) + limpieza de retazos como paso del proceso (componentes,
+  despeje de ceja, oreja, repisa bajo la oreja, sien, polvo, barrido
+  final tras cada corte). Se aplica a los 16 peinados (12 mujer + 4
+  hombre, Front y Back): 26 capas reales + 6 Back vacíos (F H5–H10).
+  0 componentes problemáticos y 0 motas finales en las 26.
+- Causa raíz de los retazos (verificada): el gris REVELA, no crea —
+  el arte joven tiene filamentos de 1–4 px invisibles en negro
+  (contraste ~0–5 niveles) que en gris se vuelven hilos brillantes
+  (~90–120). 13/16 retazos de la mujer existen idénticos en el joven
+  negro. Los cortes v9/v10 sí crearon retazos (motes y halos) por
+  tocar solo alfa>200.
+- 3 revisiones con vídeo en Playwright (60 combos: 48 ancianos + 12
+  jóvenes; ciclo 1 halló ranuras verticales en el flequillo de F H8/
+  H9/H10 por un bug del despeje de ceja — 24.043 px quitados — y se
+  arregló EN EL MÉTODO, v11.1, re-aplicado a los 16; ciclos 2 y 3 sin
+  retazos nuevos). Vídeo final: `diagnostico_usuario/edad/
+  videos_revision/ciclo3_video.webm` (41,76 s, 20 combos).
+- UNITY (`PortraitCreator.cs` CatAge=0, CatCount=11 + `PortraitRecipe.
+  cs`, `PortraitData.cs`, `PortraitView.cs`; mapa en `unity/
+  EDAD_TEXTURAS.md`). NO compilado en Unity aquí: Stiven lo prueba
+  en su PC.
+- Conocido: con Anciano el vello facial sigue oscuro (no hay capas
+  grises de barba); la web y el motor difieren hasta ~50 niveles en
+  hebras semitransparentes del pelo anciano (`teñida()`, artefacto
+  preexistente, a ojo iguales); las líneas de los hombros de la
+  chaqueta del hombre no tienen pelo debajo (0 px) — pendiente de
+  confirmación de Stiven.

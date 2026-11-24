@@ -145,14 +145,23 @@ def _sobre(fondo, a):
 
 def render(receta, fondo=(40, 44, 52)):
     """receta: dict con sexo y los índices (pelo, ropa, ojos, nariz, boca,
-    color_pelo, piel, color_ropa). Devuelve un arreglo RGB 1200x1600."""
+    color_pelo, piel, color_ropa). 'edad' es opcional (0 Joven, 1 Anciano;
+    por defecto 0, así las recetas viejas siguen funcionando). Con Anciano
+    se usan la Base anciana v9 y los pelos grises v11 (gris TOTAL horneado
+    en la capa, tinte de pelo anulado a (1,1,1): el tinte Silver no funciona
+    sobre el gris horneado). El vello facial no tiene versión anciana y
+    sigue su capa normal con el tinte de pelo. Mismo criterio que el
+    navegador (index.html) y que Unity (PortraitRecipe.ageIndex)."""
     sexo = receta['sexo']
     pelo = PELOS[sexo][receta['pelo']][1]
+    edad = receta.get('edad', 0)
+    suf = '_Elderly' if edad == 1 else ''
+    tinte_pelo = (1, 1, 1) if edad == 1 else COLORES_PELO[receta['color_pelo']][1]
     h, w = capa(sexo, 'Base').shape[:2]
     comp = np.tile(np.array(fondo, float), (h, w, 1))
-    comp = _sobre(comp, _tinte(capa(sexo, pelo + '_Back'), COLORES_PELO[receta['color_pelo']][1]))
+    comp = _sobre(comp, _tinte(capa(sexo, pelo + '_Back' + suf), tinte_pelo))
     piel = TONOS_PIEL[receta['piel']][1]
-    comp = _sobre(comp, _tinte(capa(sexo, 'Base'), piel))
+    comp = _sobre(comp, _tinte(capa(sexo, 'Base' + suf), piel))
     comp = _sobre(comp, _tinte(capa(sexo, ROPAS[sexo][receta['ropa']][1]), COLORES_ROPA[receta['color_ropa']][1]))
     comp = _sobre(comp, _tinte(capa(sexo, NARICES[receta['nariz']][1]), piel))  # la nariz sigue la piel
     ojos_arch = OJOS[receta['ojos']][1]
@@ -160,7 +169,7 @@ def render(receta, fondo=(40, 44, 52)):
     comp = _sobre(comp, capa(sexo, BOCAS[sexo][receta['boca']][1]))
     if sexo == 'Male' and receta.get('vello', 0) > 0:
         comp = _sobre(comp, _tinte(capa(sexo, VELLO[receta['vello']][1]), COLORES_PELO[receta['color_pelo']][1]))
-    comp = _sobre(comp, _tinte(capa(sexo, pelo + '_Front'), COLORES_PELO[receta['color_pelo']][1]))
+    comp = _sobre(comp, _tinte(capa(sexo, pelo + '_Front' + suf), tinte_pelo))
     return comp
 
 def codigo(receta):
@@ -170,6 +179,8 @@ def codigo(receta):
             f"ST{receta['piel']+1} OC{receta['color_ropa']+1} EC{receta.get('color_ojos', 0)+1}")
     if receta['sexo'] == 'Male':
         base += f" FH{receta.get('vello', 0)}"
+    # Marcador de edad: AG1 = Joven, AG2 = Anciano (igual en web y Unity).
+    base += f" AG{receta.get('edad', 0)+1}"
     return base
 
 def guardar_png(receta, ruta, cara=False):
@@ -177,16 +188,19 @@ def guardar_png(receta, ruta, cara=False):
     # Para exportar con transparencia real se recompone sobre alfa:
     sexo = receta['sexo']
     pelo = PELOS[sexo][receta['pelo']][1]
+    edad = receta.get('edad', 0)
+    suf = '_Elderly' if edad == 1 else ''
+    tinte_pelo = (1, 1, 1) if edad == 1 else COLORES_PELO[receta['color_pelo']][1]
     piel = TONOS_PIEL[receta['piel']][1]
     capas = [
-        _tinte(capa(sexo, pelo + '_Back'), COLORES_PELO[receta['color_pelo']][1]),
-        _tinte(capa(sexo, 'Base'), piel),
+        _tinte(capa(sexo, pelo + '_Back' + suf), tinte_pelo),
+        _tinte(capa(sexo, 'Base' + suf), piel),
         _tinte(capa(sexo, ROPAS[sexo][receta['ropa']][1]), COLORES_ROPA[receta['color_ropa']][1]),
         _tinte(capa(sexo, NARICES[receta['nariz']][1]), piel),
         _ojos_tinte(capa(sexo, OJOS[receta['ojos']][1]), OJOS[receta['ojos']][1], receta.get('color_ojos', 0), sexo),
         capa(sexo, BOCAS[sexo][receta['boca']][1]),
         _tinte(capa(sexo, VELLO[receta['vello']][1]), COLORES_PELO[receta['color_pelo']][1]) if sexo == 'Male' and receta.get('vello', 0) > 0 else np.zeros((1600, 1200, 4)),
-        _tinte(capa(sexo, pelo + '_Front'), COLORES_PELO[receta['color_pelo']][1]),
+        _tinte(capa(sexo, pelo + '_Front' + suf), tinte_pelo),
     ]
     h, w = capas[0].shape[:2]
     salida = np.zeros((h, w, 4))

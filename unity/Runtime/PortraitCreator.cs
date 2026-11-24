@@ -11,7 +11,7 @@ namespace PortraitKit
     /// panel lets you build a character with a few clicks.
     ///
     /// - Switch between the included characters (Female / Male) at the top.
-    /// - Every category (hair, outfit, eyes, eye color, nose, mouth,
+    /// - Every category (age, hair, outfit, eyes, eye color, nose, mouth,
     ///   facial hair, hair color, skin tone, outfit color) has a &lt; and
     ///   &gt; button: one click per step,
     ///   and the portrait updates instantly. The four color categories
@@ -20,6 +20,13 @@ namespace PortraitKit
     ///   can be picked in one click; the selected swatch gets a white
     ///   border.
     /// - "Randomize" (or Space) builds a whole new look at once.
+    /// - Every row also has a small PIN button: a pinned trait is locked,
+    ///   so Randomize leaves it exactly as it is and only randomizes the
+    ///   rest (a pinned trait can still be changed by hand with &lt; &gt;
+    ///   or the color swatches). A pinned row shows its PIN button in gold
+    ///   and its value in gold. "Reset to Default" restores the opening
+    ///   look (Female, everything at its first option) and unpins every
+    ///   trait at once.
     /// - "Export PNG" saves the full 1200x1600 portrait with transparency;
     ///   "Export Face PNG" saves the top 1200x1200 square.
     /// - "Save Recipe" stores the current look as a small JSON file (and
@@ -96,11 +103,20 @@ namespace PortraitKit
         // outline of the currently selected color.
         Outline[][] swatchOutlines;
 
-        // Category ids, in panel order.
-        const int CatHair = 0, CatOutfit = 1, CatEyes = 2, CatEyeColor = 3, CatNose = 4, CatMouth = 5,
-                  CatFacialHair = 6, CatHairColor = 7, CatSkinTone = 8, CatOutfitColor = 9, CatCount = 10;
+        // Pinned (locked) traits, indexed by category: a pinned trait is
+        // left untouched by Randomize. This is panel state only, it is
+        // never part of the recipe or the combo code.
+        bool[] locked = new bool[CatCount];
+        Image[] lockImages;
+
+        // Category ids, in panel order. AGE is first, like in the web
+        // creator: Young (0) shows the young base and hair, Elderly (1)
+        // the elderly base (wrinkles) and the grey v11 hair layers with
+        // no hair tint (see PortraitRecipe.ageIndex and EDAD_TEXTURAS.md).
+        const int CatAge = 0, CatHair = 1, CatOutfit = 2, CatEyes = 3, CatEyeColor = 4, CatNose = 5, CatMouth = 6,
+                  CatFacialHair = 7, CatHairColor = 8, CatSkinTone = 9, CatOutfitColor = 10, CatCount = 11;
         static readonly string[] CategoryLabels =
-            { "HAIR", "OUTFIT", "EYES", "EYE COLOR", "NOSE", "MOUTH", "FACIAL HAIR", "HAIR COLOR", "SKIN TONE", "OUTFIT COLOR" };
+            { "AGE", "HAIR", "OUTFIT", "EYES", "EYE COLOR", "NOSE", "MOUTH", "FACIAL HAIR", "HAIR COLOR", "SKIN TONE", "OUTFIT COLOR" };
 
         void Start()
         {
@@ -175,6 +191,8 @@ namespace PortraitKit
             var data = CurrentData;
             if (data == null || recipe == null)
                 return;
+            // Age is 0 Young / 1 Elderly and holds for both characters.
+            recipe.ageIndex = Mathf.Clamp(recipe.ageIndex, 0, 1);
             recipe.hairIndex = data.hairs != null && data.hairs.Length > 0
                 ? Mathf.Clamp(recipe.hairIndex, 0, data.hairs.Length - 1) : 0;
             recipe.outfitIndex = data.outfits != null && data.outfits.Length > 0
@@ -232,6 +250,8 @@ namespace PortraitKit
             }
         }
 
+        public void NextAge() { Cycle(CatAge, 1); }
+        public void PrevAge() { Cycle(CatAge, -1); }
         public void NextHair() { Cycle(CatHair, 1); }
         public void PrevHair() { Cycle(CatHair, -1); }
         public void NextOutfit() { Cycle(CatOutfit, 1); }
@@ -253,26 +273,30 @@ namespace PortraitKit
         public void NextOutfitColor() { Cycle(CatOutfitColor, 1); }
         public void PrevOutfitColor() { Cycle(CatOutfitColor, -1); }
 
-        /// <summary>Builds a whole new random look for the current character.</summary>
+        /// <summary>Builds a whole new random look for the current character.
+        /// Pinned (locked) traits keep their current value; only the rest
+        /// is randomized.</summary>
         public void Randomize()
         {
             var data = CurrentData;
             if (data == null || palette == null)
                 return;
+            var old = recipe;
             recipe = new PortraitRecipe
             {
                 characterId = data.characterId,
-                hairIndex = RandomIndex(data.hairs != null ? data.hairs.Length : 0),
-                outfitIndex = RandomIndex(data.outfits != null ? data.outfits.Length : 0),
-                eyesIndex = RandomIndex(data.eyes != null ? data.eyes.Length : 0),
-                noseIndex = RandomIndex(data.noses != null ? data.noses.Length : 0),
-                mouthIndex = RandomIndex(data.mouths != null ? data.mouths.Length : 0),
-                hairColorIndex = RandomIndex(palette.hairColors != null ? palette.hairColors.Length : 0),
-                skinToneIndex = RandomIndex(palette.skinTones != null ? palette.skinTones.Length : 0),
-                outfitColorIndex = RandomIndex(palette.outfitColors != null ? palette.outfitColors.Length : 0),
-                eyeColorIndex = RandomIndex(palette.eyeColors != null ? palette.eyeColors.Length : 0),
-                facialHairIndex = data.facialHairs != null && data.facialHairs.Length > 0
-                    ? RandomIndex(data.facialHairs.Length + 1) : 0,
+                ageIndex = locked[CatAge] ? old.ageIndex : RandomIndex(2),
+                hairIndex = locked[CatHair] ? old.hairIndex : RandomIndex(data.hairs != null ? data.hairs.Length : 0),
+                outfitIndex = locked[CatOutfit] ? old.outfitIndex : RandomIndex(data.outfits != null ? data.outfits.Length : 0),
+                eyesIndex = locked[CatEyes] ? old.eyesIndex : RandomIndex(data.eyes != null ? data.eyes.Length : 0),
+                noseIndex = locked[CatNose] ? old.noseIndex : RandomIndex(data.noses != null ? data.noses.Length : 0),
+                mouthIndex = locked[CatMouth] ? old.mouthIndex : RandomIndex(data.mouths != null ? data.mouths.Length : 0),
+                hairColorIndex = locked[CatHairColor] ? old.hairColorIndex : RandomIndex(palette.hairColors != null ? palette.hairColors.Length : 0),
+                skinToneIndex = locked[CatSkinTone] ? old.skinToneIndex : RandomIndex(palette.skinTones != null ? palette.skinTones.Length : 0),
+                outfitColorIndex = locked[CatOutfitColor] ? old.outfitColorIndex : RandomIndex(palette.outfitColors != null ? palette.outfitColors.Length : 0),
+                eyeColorIndex = locked[CatEyeColor] ? old.eyeColorIndex : RandomIndex(palette.eyeColors != null ? palette.eyeColors.Length : 0),
+                facialHairIndex = locked[CatFacialHair] ? old.facialHairIndex : (data.facialHairs != null && data.facialHairs.Length > 0
+                    ? RandomIndex(data.facialHairs.Length + 1) : 0),
             };
             randomCounter++;
             lastWasRandom = true;
@@ -283,11 +307,41 @@ namespace PortraitKit
                 recipe.Describe(data, palette) + " (" + recipe.ComboCode() + ")");
         }
 
+        /// <summary>Pins or unpins one trait (used by the PIN button of
+        /// each row). A pinned trait is skipped by Randomize.</summary>
+        public void ToggleLock(int category)
+        {
+            if (category < 0 || category >= CatCount)
+                return;
+            locked[category] = !locked[category];
+            RefreshUI();
+        }
+
+        /// <summary>Restores the opening look (first character, every
+        /// category at its first option) and unpins every trait at once,
+        /// like opening the creator for the first time.</summary>
+        public void ResetToDefault()
+        {
+            for (int i = 0; i < CatCount; i++)
+                locked[i] = false;
+            characterIndex = 0;
+            recipe = new PortraitRecipe();
+            if (CurrentData != null)
+                recipe.characterId = CurrentData.characterId;
+            ClampRecipeToData();
+            randomCounter = 0;
+            lastWasRandom = false;
+            ApplyCurrent();
+            RefreshUI();
+            SetStatus("Restored to default.");
+        }
+
         int CategoryCount(int category)
         {
             var data = CurrentData;
             switch (category)
             {
+                case CatAge: return 2;
                 case CatHair: return data != null && data.hairs != null ? data.hairs.Length : 0;
                 case CatOutfit: return data != null && data.outfits != null ? data.outfits.Length : 0;
                 case CatEyes: return data != null && data.eyes != null ? data.eyes.Length : 0;
@@ -306,6 +360,7 @@ namespace PortraitKit
         {
             switch (category)
             {
+                case CatAge: return recipe.ageIndex;
                 case CatHair: return recipe.hairIndex;
                 case CatOutfit: return recipe.outfitIndex;
                 case CatEyes: return recipe.eyesIndex;
@@ -324,6 +379,7 @@ namespace PortraitKit
         {
             switch (category)
             {
+                case CatAge: recipe.ageIndex = value; break;
                 case CatHair: recipe.hairIndex = value; break;
                 case CatOutfit: recipe.outfitIndex = value; break;
                 case CatEyes: recipe.eyesIndex = value; break;
@@ -343,6 +399,8 @@ namespace PortraitKit
             int value = CategoryValue(category);
             switch (category)
             {
+                case CatAge:
+                    return value == 1 ? "Elderly" : "Young";
                 case CatHair:
                     return data != null && data.hairs != null && data.hairs.Length > 0
                         ? data.hairs[Mathf.Clamp(value, 0, data.hairs.Length - 1)].name : "-";
@@ -567,32 +625,40 @@ namespace PortraitKit
                 }
             }
 
-            // Category rows. The four color categories (eye color, hair
-            // color, skin tone, outfit color) get a row of clickable
-            // color swatches right under their row, so a color can be
-            // picked in one click instead of stepping through the list
-            // with < and >. The rows are a little shorter than before so
-            // the four swatch rows fit above the action buttons.
+            // Category rows (eleven now: AGE first, then the ten from
+            // before). The four color categories (eye color, hair color,
+            // skin tone, outfit color) get a row of clickable color
+            // swatches right under their row, so a color can be picked in
+            // one click instead of stepping through the list with < and >.
+            // The rows are a little shorter than before (0.034 instead of
+            // 0.038) so the eleven rows plus the four swatch rows still
+            // fit above the action buttons: the last action button ends
+            // at ~0.10, clear of the combo line (0.008-0.055).
             rowValueTexts = new Text[CatCount];
             swatchOutlines = new Outline[CatCount][];
+            lockImages = new Image[CatCount];
             float rowTop = 0.868f;
             for (int c = 0; c < CatCount; c++)
             {
                 int captured = c;
                 float top = rowTop;
-                float bottom = top - 0.038f;
-                var label = MakeText(panel, CategoryLabels[c], 0.04f, bottom, 0.30f, top, 17, TextAnchor.MiddleLeft);
+                float bottom = top - 0.034f;
+                var label = MakeText(panel, CategoryLabels[c], 0.04f, bottom, 0.28f, top, 17, TextAnchor.MiddleLeft);
                 label.color = new Color(0.75f, 0.78f, 0.82f);
-                MakeButton(panel, "<", 0.315f, bottom, 0.415f, top, () => Cycle(captured, -1));
-                rowValueTexts[c] = MakeText(panel, "-", 0.43f, bottom, 0.845f, top, 20, TextAnchor.MiddleCenter);
+                MakeButton(panel, "<", 0.295f, bottom, 0.38f, top, () => Cycle(captured, -1));
+                rowValueTexts[c] = MakeText(panel, "-", 0.395f, bottom, 0.74f, top, 20, TextAnchor.MiddleCenter);
+                // PIN button: pins the trait so Randomize leaves it alone.
+                // (The legacy UI font has no lock emoji, so the button says
+                // PIN and turns gold while pinned.)
+                lockImages[c] = MakeLockButton(panel, 0.75f, bottom, 0.845f, top, () => ToggleLock(captured));
                 MakeButton(panel, ">", 0.86f, bottom, 0.96f, top, () => Cycle(captured, 1));
-                rowTop = bottom - 0.006f;
+                rowTop = bottom - 0.005f;
 
                 var colors = PaletteColors(c);
                 if (colors != null && colors.Length > 0)
                 {
                     float swatchTop = rowTop;
-                    float swatchBottom = swatchTop - 0.026f;
+                    float swatchBottom = swatchTop - 0.024f;
                     swatchOutlines[c] = new Outline[colors.Length];
                     float gap = 0.004f;
                     float w = (0.92f - gap * (colors.Length - 1)) / colors.Length;
@@ -604,19 +670,19 @@ namespace PortraitKit
                             x0, swatchBottom, x0 + w, swatchTop,
                             () => SelectColor(captured, capturedIndex));
                     }
-                    rowTop = swatchBottom - 0.006f;
+                    rowTop = swatchBottom - 0.005f;
                 }
             }
 
-            // Action buttons.
-            string[] actions = { "Randomize", "Export PNG", "Export Face PNG", "Save Recipe", "Load Recipe" };
+            // Action buttons (six now, so they are a little shorter).
+            string[] actions = { "Randomize", "Reset to Default", "Export PNG", "Export Face PNG", "Save Recipe", "Load Recipe" };
             UnityEngine.Events.UnityAction[] handlers =
-                { Randomize, ExportPng, ExportFacePng, SaveRecipe, LoadRecipe };
-            float actionTop = rowTop - 0.006f;
+                { Randomize, ResetToDefault, ExportPng, ExportFacePng, SaveRecipe, LoadRecipe };
+            float actionTop = rowTop - 0.005f;
             for (int i = 0; i < actions.Length; i++)
             {
-                float top = actionTop - i * 0.048f;
-                MakeButton(panel, actions[i], 0.04f, top - 0.042f, 0.96f, top, handlers[i]);
+                float top = actionTop - i * 0.037f;
+                MakeButton(panel, actions[i], 0.04f, top - 0.032f, 0.96f, top, handlers[i]);
             }
 
             // Combo code line at the bottom of the panel: the exact
@@ -637,8 +703,21 @@ namespace PortraitKit
             if (rowValueTexts == null)
                 return;
             for (int c = 0; c < CatCount; c++)
+            {
                 if (rowValueTexts[c] != null)
+                {
                     rowValueTexts[c].text = CategoryName(c);
+                    // A pinned trait shows its value in gold.
+                    rowValueTexts[c].color = locked[c]
+                        ? new Color(1.0f, 0.84f, 0.35f)
+                        : Color.white;
+                }
+                // A pinned trait shows its PIN button in gold.
+                if (lockImages != null && lockImages[c] != null)
+                    lockImages[c].color = locked[c]
+                        ? new Color(0.54f, 0.43f, 0.18f, 0.95f)
+                        : new Color(0.22f, 0.25f, 0.30f, 0.95f);
+            }
             // The selected swatch of each color row gets a white border;
             // every other swatch has its border disabled.
             if (swatchOutlines != null)
@@ -721,6 +800,26 @@ namespace PortraitKit
             outline.effectDistance = new Vector2(2f, -2f);
             outline.enabled = false;
             return outline;
+        }
+
+        /// <summary>The small PIN button of one category row. It says PIN
+        /// (the legacy UI font has no lock emoji) and its background turns
+        /// gold while the trait is pinned; the returned Image is recolored
+        /// by RefreshUI. The text is smaller than the row buttons so PIN
+        /// fits in the narrow slot.</summary>
+        static Image MakeLockButton(Transform parent, float x0, float y0, float x1, float y1,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            var rect = MakeRect(parent, x0, y0, x1, y1);
+            rect.gameObject.name = "PIN Button";
+            var image = rect.gameObject.AddComponent<Image>();
+            image.color = new Color(0.22f, 0.25f, 0.30f, 0.95f);
+            var button = rect.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.onClick.AddListener(onClick);
+            var text = MakeText(rect, "PIN", 0f, 0f, 1f, 1f, 15, TextAnchor.MiddleCenter);
+            text.raycastTarget = false;
+            return image;
         }
     }
 }

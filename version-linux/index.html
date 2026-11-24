@@ -11,6 +11,10 @@
   .fila { display:flex; align-items:center; gap:8px; margin:7px 0; }
   .fila span.etq { width:104px; font-size:12px; letter-spacing:.06em; color:#aeb6c2; }
   .fila b { flex:1; text-align:center; font-weight:600; font-size:14px; }
+  .candado { background:transparent; padding:7px 8px; font-size:13px; line-height:1; }
+  .candado:hover { background:#475061; }
+  .candado.fijo { background:#8a6d2f; }
+  .fila.fijo b { color:#ffd65a; }
   button { background:#39404d; color:#fff; border:0; border-radius:4px; padding:7px 12px; cursor:pointer; font-size:14px; }
   button:hover { background:#475061; }
   button.ancho { width:100%; margin:5px 0; padding:10px; }
@@ -30,6 +34,7 @@
   </div>
   <div id="filas"></div>
   <button class="ancho" id="btnAzar">Randomize</button>
+  <button class="ancho" id="btnReset">Reset to Default</button>
   <button class="ancho" id="btnExportar">Export PNG</button>
   <button class="ancho" id="btnCara">Export Face PNG</button>
   <button class="ancho" id="btnGuardar">Save Recipe</button>
@@ -39,6 +44,7 @@
   <div id="estado">Cargando capas…</div>
 </div>
 <script>
+const EDADES = ["Young","Elderly"];
 const PELOS = { Female:["Long Straight","Pixie Cut","Bob Cut","Long Wavy","Twin Tails","High Ponytail","Long Braid","Double Buns","Hime Cut","Messy Bun","Side Ponytail","Long Curly"], Male:["Style 1","Style 2","Style 3","Style 4"] };
 const ROPAS = { Female:["Sweater and Jacket","Green Jacket","Blue Hoodie"], Male:["Outfit 1","Outfit 2","Outfit 3"] };
 const OJOS = ["Neutral","Happy","Sad","Angry","Surprised"];
@@ -52,17 +58,24 @@ const PIEL = [["Light",[1,1,1]],["Warm",[.96,.85,.74]],["Tan",[.85,.66,.50]],["D
 const COL_ROPA = [["White",[1,1,1]],["Sand",[.92,.84,.70]],["Olive",[.62,.66,.48]],["Sky",[.62,.76,.92]],["Rose",[.94,.70,.72]],["Charcoal",[.35,.35,.38]],["Black",[.15,.15,.16]],["Gray",[.60,.60,.62]],["Navy",[.20,.28,.52]],["Royal Blue",[.30,.42,.85]],["Denim",[.42,.55,.72]],["Mint",[.62,.85,.70]],["Forest",[.30,.48,.32]],["Lime",[.72,.85,.45]],["Yellow",[.95,.85,.40]],["Orange",[.92,.58,.30]],["Coral",[.92,.55,.48]],["Red",[.78,.25,.25]],["Burgundy",[.50,.20,.26]],["Pink",[.95,.65,.78]],["Lavender",[.72,.65,.88]],["Purple",[.52,.38,.72]],["Brown",[.48,.36,.26]],["Camel",[.78,.62,.42]]];
 const COL_OJOS = [["Original Green",null],["Brown",[110,68,40]],["Blue",[58,105,185]],["Amber",[185,128,48]],["Violet",[128,92,185]],["Gray",[128,132,138]],["Red",[175,42,38]]];
 
-let R = { sexo:"Female", pelo:0, ropa:0, ojos:0, nariz:0, boca:0, color_pelo:0, piel:0, color_ropa:0, color_ojos:0, vello:0 };
+let R = { sexo:"Female", edad:0, pelo:0, ropa:0, ojos:0, nariz:0, boca:0, color_pelo:0, piel:0, color_ropa:0, color_ojos:0, vello:0 };
+// Rasgos fijados: clave -> true. Un rasgo fijado NO cambia con Randomize
+// (se cambia solo a mano, con < > o con los cuadritos de color). No forma
+// parte de la receta (no se guarda en el JSON), es solo estado del panel.
+let FIJOS = {};
 let contador = 0, imgs = {};
 
 function cargar(nombre){ return new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.src=nombre; }); }
 async function precargar(){
   for (const sexo of ["Female","Male"]){
-    const lista = ["Base","Nose1","Nose2","Nose3","Eyes_Neutral","Eyes_Happy","Eyes_Sad","Eyes_Angry","Eyes_Surprised",
+    const lista = ["Base","Base_Elderly","Nose1","Nose2","Nose3","Eyes_Neutral","Eyes_Happy","Eyes_Sad","Eyes_Angry","Eyes_Surprised",
       "Mouth_Neutral","Mouth_Happy","Mouth_Surprised","Outfit1","Outfit2","Outfit3",
-      "Hair1_Back","Hair1_Front","Hair2_Back","Hair2_Front","Hair3_Back","Hair3_Front","Hair4_Back","Hair4_Front"];
+      "Hair1_Back","Hair1_Front","Hair2_Back","Hair2_Front","Hair3_Back","Hair3_Front","Hair4_Back","Hair4_Front",
+      "Hair1_Back_Elderly","Hair1_Front_Elderly","Hair2_Back_Elderly","Hair2_Front_Elderly",
+      "Hair3_Back_Elderly","Hair3_Front_Elderly","Hair4_Back_Elderly","Hair4_Front_Elderly"];
     if (sexo==="Male") lista.push("FacialHair1","FacialHair2","FacialHair3");
     if (sexo==="Female") lista.push("Hair5_Back","Hair5_Front","Hair6_Back","Hair6_Front","Hair7_Back","Hair7_Front","Hair8_Back","Hair8_Front","Hair9_Back","Hair9_Front","Hair10_Back","Hair10_Front","Hair11_Back","Hair11_Front","Hair12_Back","Hair12_Front");
+    if (sexo==="Female") lista.push("Hair5_Back_Elderly","Hair5_Front_Elderly","Hair6_Back_Elderly","Hair6_Front_Elderly","Hair7_Back_Elderly","Hair7_Front_Elderly","Hair8_Back_Elderly","Hair8_Front_Elderly","Hair9_Back_Elderly","Hair9_Front_Elderly","Hair10_Back_Elderly","Hair10_Front_Elderly","Hair11_Back_Elderly","Hair11_Front_Elderly","Hair12_Back_Elderly","Hair12_Front_Elderly");
     if (sexo==="Female") lista.push("Mouth_Sad","Mouth_Angry");
     for (const n of lista) imgs[sexo+"/"+n] = await cargar(`assets/${sexo}/${n}.png`);
   }
@@ -164,21 +177,33 @@ function componer(dest){
   const x = dest.getContext("2d"); x.clearRect(0,0,1200,1600);
   const S = R.sexo, piel = PIEL[R.piel][1], cp = COL_PELO[R.color_pelo][1], cr = COL_ROPA[R.color_ropa][1];
   const pelo = ARCH.pelo(R.pelo);
-  x.drawImage(teñida(imgs[S+"/"+pelo+"_Back"], cp),0,0);
-  x.drawImage(teñida(imgs[S+"/Base"], piel),0,0);
+  // EDAD: con Anciano (edad 1) se usan la Base anciana v9 y el juego de
+  // pelos grises v11 (gris TOTAL horneado en la capa). El tinte de pelo NO
+  // se aplica al pelo anciano: va en (1,1,1), porque el tinte Silver no
+  // funciona sobre el gris horneado (lo ensucia) y cualquier otro tinte lo
+  // recolorearía. El vello facial (solo hombre) no tiene versión anciana y
+  // sigue su capa normal con el tinte de pelo.
+  const anc = R.edad===1;
+  const suf = anc ? "_Elderly" : "";
+  const tintePelo = anc ? [1,1,1] : cp;
+  x.drawImage(teñida(imgs[S+"/"+pelo+"_Back"+suf], tintePelo),0,0);
+  x.drawImage(teñida(imgs[S+"/Base"+suf], piel),0,0);
   x.drawImage(teñida(imgs[S+"/"+ARCH.ropa(R.ropa)], cr),0,0);
   x.drawImage(teñida(imgs[S+"/"+ARCH.nariz(R.nariz)], piel),0,0);   // la nariz sigue la piel
   x.drawImage(ojosTeñidos(S+"/"+ARCH.ojos(R.ojos)),0,0);
   x.drawImage(imgs[S+"/"+ARCH.boca(R.boca,S)],0,0);
   if (S==="Male" && R.vello>0) x.drawImage(teñida(imgs[S+"/FacialHair"+R.vello], cp),0,0);
-  x.drawImage(teñida(imgs[S+"/"+pelo+"_Front"], cp),0,0);
+  x.drawImage(teñida(imgs[S+"/"+pelo+"_Front"+suf], tintePelo),0,0);
 }
 function codigo(){
   const s = R.sexo==="Female"?"F":"M";
-  return `${s} H${R.pelo+1} O${R.ropa+1} E${R.ojos+1} N${R.nariz+1} M${R.boca+1} | HC${R.color_pelo+1} ST${R.piel+1} OC${R.color_ropa+1} EC${R.color_ojos+1}` + (s==="M" ? ` FH${R.vello}` : "");
+  // Marcador de edad: AG1 = Joven, AG2 = Anciano. Va al final del código,
+  // después de EC (y de FH en el hombre), y se lee igual en web, motor.py
+  // y Unity (PortraitRecipe.ComboCode). 0 = Joven, 1 = Anciano en la receta.
+  return `${s} H${R.pelo+1} O${R.ropa+1} E${R.ojos+1} N${R.nariz+1} M${R.boca+1} | HC${R.color_pelo+1} ST${R.piel+1} OC${R.color_ropa+1} EC${R.color_ojos+1}` + (s==="M" ? ` FH${R.vello}` : "") + ` AG${R.edad+1}`;
 }
 const FILAS = [
-  ["HAIR","pelo",()=>PELOS[R.sexo]], ["OUTFIT","ropa",()=>ROPAS[R.sexo]], ["EYES","ojos",()=>OJOS], ["EYE COLOR","color_ojos",()=>COL_OJOS.map(c=>c[0])],
+  ["AGE","edad",()=>EDADES], ["HAIR","pelo",()=>PELOS[R.sexo]], ["OUTFIT","ropa",()=>ROPAS[R.sexo]], ["EYES","ojos",()=>OJOS], ["EYE COLOR","color_ojos",()=>COL_OJOS.map(c=>c[0])],
   ["NOSE","nariz",()=>NARICES], ["MOUTH","boca",()=>BOCAS[R.sexo]], ["FACIAL HAIR","vello",()=>R.sexo==="Male"?VELLO:["—"]],
   ["HAIR COLOR","color_pelo",()=>COL_PELO.map(c=>c[0])], ["SKIN TONE","piel",()=>PIEL.map(c=>c[0])],
   ["OUTFIT COLOR","color_ropa",()=>COL_ROPA.map(c=>c[0])] ];
@@ -186,8 +211,9 @@ const COLOR_FILAS = { color_pelo: COL_PELO, piel: PIEL, color_ropa: COL_ROPA, co
 function construirFilas(){
   const cont = document.getElementById("filas"); cont.innerHTML="";
   for (const [etq, clave, lista] of FILAS){
-    const d = document.createElement("div"); d.className="fila";
-    d.innerHTML = `<span class="etq">${etq}</span><button data-k="${clave}" data-d="-1">&lt;</button><b id="v_${clave}"></b><button data-k="${clave}" data-d="1">&gt;</button>`;
+    const d = document.createElement("div"); d.className="fila"+(FIJOS[clave]?" fijo":"");
+    const fijo = FIJOS[clave];
+    d.innerHTML = `<span class="etq">${etq}</span><button data-k="${clave}" data-d="-1">&lt;</button><b id="v_${clave}"></b><button data-k="${clave}" data-d="1">&gt;</button><button class="candado${fijo?" fijo":""}" data-candado="${clave}" title="${fijo?"Locked — Randomize will skip this trait. Click to unlock.":"Lock this trait — Randomize will skip it."}">${fijo?"🔒":"🔓"}</button>`;
     cont.appendChild(d);
     if (COLOR_FILAS[clave]){
       const m = document.createElement("div");
@@ -203,8 +229,14 @@ function construirFilas(){
       cont.appendChild(m);
     }
   }
-  cont.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const k=b.dataset.k, n=FILAS.find(f=>f[1]===k)[2]().length;
+  // Solo los botones < > llevan el handler de ciclo: los cuadritos de
+  // color y los candados tienen su propio onclick y no tienen data-k.
+  // (Antes se reasignaba el onclick a TODOS los botones y al hacer clic
+  // en un cuadrito de color se rompía: FILAS.find(...) daba undefined.)
+  cont.querySelectorAll("button[data-k]").forEach(b=>b.onclick=()=>{ const k=b.dataset.k, n=FILAS.find(f=>f[1]===k)[2]().length;
     R[k]=(R[k]+parseInt(b.dataset.d)+n)%n; dibujar(); });
+  cont.querySelectorAll("button[data-candado]").forEach(b=>b.onclick=()=>{ const k=b.dataset.candado;
+    FIJOS[k]=!FIJOS[k]; dibujar(); });
   document.getElementById("btnF").className = R.sexo==="Female"?"activo":"";
   document.getElementById("btnM").className = R.sexo==="Male"?"activo":"";
 }
@@ -215,6 +247,9 @@ function limitar(){
   // Female H12 a Male dejaba R.pelo=11 y el código mostraba "H12" mientras
   // el pelo desaparecía (no existe Hair12 en Male). Igual que el fix de
   // ClampRecipeToData en Unity (PortraitCreator.cs, stage20).
+  // La edad (0 Joven / 1 Anciano) vale para los dos sexos; una receta vieja
+  // sin "edad" deja R.edad como estaba (undefined|0 = 0, Joven).
+  R.edad=Math.min(Math.max(R.edad|0,0), 1);
   R.pelo=Math.min(Math.max(R.pelo|0,0), PELOS[R.sexo].length-1);
   R.boca=Math.min(Math.max(R.boca|0,0), BOCAS[R.sexo].length-1);
   R.ropa=Math.min(Math.max(R.ropa|0,0), 2);
@@ -243,8 +278,28 @@ function exportar(cara){
 document.getElementById("btnF").onclick = ()=>{ R.sexo="Female"; R.boca=Math.min(R.boca,4); dibujar(); };
 document.getElementById("btnM").onclick = ()=>{ R.sexo="Male"; R.boca=Math.min(R.boca,2); dibujar(); };
 document.getElementById("btnAzar").onclick = ()=>{ const r=(n)=>Math.floor(Math.random()*n);
-  R.pelo=r(PELOS[R.sexo].length); R.ropa=r(3); R.ojos=r(5); R.nariz=r(3); R.boca=r(BOCAS[R.sexo].length);
-  R.color_pelo=r(COL_PELO.length); R.piel=r(4); R.color_ropa=r(COL_ROPA.length); R.color_ojos=r(COL_OJOS.length); if(R.sexo==="Male") R.vello=r(4); contador++; dibujar(); };
+  // Los rasgos fijados (candado) NO se tocan: solo se aleatorizan los demás.
+  if(!FIJOS.edad) R.edad=r(2);
+  if(!FIJOS.pelo) R.pelo=r(PELOS[R.sexo].length);
+  if(!FIJOS.ropa) R.ropa=r(3);
+  if(!FIJOS.ojos) R.ojos=r(5);
+  if(!FIJOS.nariz) R.nariz=r(3);
+  if(!FIJOS.boca) R.boca=r(BOCAS[R.sexo].length);
+  if(!FIJOS.color_pelo) R.color_pelo=r(COL_PELO.length);
+  if(!FIJOS.piel) R.piel=r(4);
+  if(!FIJOS.color_ropa) R.color_ropa=r(COL_ROPA.length);
+  if(!FIJOS.color_ojos) R.color_ojos=r(COL_OJOS.length);
+  if(R.sexo==="Male" && !FIJOS.vello) R.vello=r(4);
+  contador++; dibujar(); };
+document.getElementById("btnReset").onclick = ()=>{
+  // Vuelve al personaje por defecto (mujer, todo en 1) y quita TODOS los
+  // candados, como al abrir el programa por primera vez.
+  R = { sexo:"Female", edad:0, pelo:0, ropa:0, ojos:0, nariz:0, boca:0, color_pelo:0, piel:0, color_ropa:0, color_ojos:0, vello:0 };
+  FIJOS = {};
+  contador = 0;
+  dibujar();
+  document.getElementById("estado").textContent = "Restored to default.";
+};
 document.getElementById("btnExportar").onclick = ()=>exportar(false);
 document.getElementById("btnCara").onclick = ()=>exportar(true);
 document.getElementById("btnGuardar").onclick = ()=>{
