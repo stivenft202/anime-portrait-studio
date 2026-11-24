@@ -75,6 +75,9 @@ namespace PortraitKit
         [Header("Facial hair (male character only; empty for the female)")]
         public NamedSprite[] facialHairs = new NamedSprite[0];
 
+        [Header("Elderly facial hair (grey v11.1 layers, same order as facialHairs; used instead of them when the recipe's age is Elderly; leave empty to fall back to the young layers)")]
+        public NamedSprite[] facialHairsElderly = new NamedSprite[0];
+
         [Header("Eye color variants (baked layers named \"Eyes|Color\")")]
         public NamedSprite[] eyeVariants = new NamedSprite[0];
     }

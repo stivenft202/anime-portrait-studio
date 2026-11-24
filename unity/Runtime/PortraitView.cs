@@ -242,7 +242,10 @@ namespace PortraitKit
         /// <summary>
         /// Changes the facial hair layer (male character only; index 0
         /// means none, 1..N selects facialHairs[index - 1]). The layer
-        /// is tinted with the current hair color.
+        /// is tinted with the current hair color, except with an elderly
+        /// recipe, where the grey v11.1 layer (facialHairsElderly) is
+        /// used untinted (white), falling back to the young layer when
+        /// no elderly sprite is assigned.
         /// </summary>
         public void SetFacialHair(int index)
         {
@@ -256,8 +259,14 @@ namespace PortraitKit
                 facialHairRenderer.sprite = null;
                 return;
             }
-            facialHairRenderer.sprite = CurrentData.facialHairs[index - 1].sprite;
-            facialHairRenderer.color = currentHairColor;
+            bool elderly = CurrentRecipe != null && CurrentRecipe.ageIndex == 1;
+            if (elderly && CurrentData.facialHairsElderly != null
+                && index - 1 < CurrentData.facialHairsElderly.Length
+                && CurrentData.facialHairsElderly[index - 1].sprite != null)
+                facialHairRenderer.sprite = CurrentData.facialHairsElderly[index - 1].sprite;
+            else
+                facialHairRenderer.sprite = CurrentData.facialHairs[index - 1].sprite;
+            facialHairRenderer.color = elderly ? Color.white : currentHairColor;
         }
 
         /// <summary>Changes the mouth layer (never tinted).</summary>
@@ -287,10 +296,10 @@ namespace PortraitKit
         Color currentHairColor = Color.white;
 
         /// <summary>Tints both hair layers and the facial hair (multiplicative).
-        /// With an elderly recipe the hair layers stay WHITE (the grey is
-        /// baked in the v11 layers, the same rule as the web creator and
-        /// motor.py); only the facial hair follows the hair color, since it
-        /// has no elderly version.</summary>
+        /// With an elderly recipe the hair layers AND the facial hair stay
+        /// WHITE (the grey is baked in the v11 / v11.1 layers, the same
+        /// rule as the web creator and motor.py); missing elderly facial
+        /// hair sprites fall back to the young layer, still untinted.</summary>
         public void SetHairColor(Color color)
         {
             currentHairColor = color;
@@ -300,7 +309,7 @@ namespace PortraitKit
             if (hairFrontRenderer != null)
                 hairFrontRenderer.color = hair;
             if (facialHairRenderer != null)
-                facialHairRenderer.color = color;
+                facialHairRenderer.color = hair;
         }
 
         // Last skin tone applied, so the nose layer can follow it.

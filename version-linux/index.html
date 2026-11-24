@@ -73,7 +73,7 @@ async function precargar(){
       "Hair1_Back","Hair1_Front","Hair2_Back","Hair2_Front","Hair3_Back","Hair3_Front","Hair4_Back","Hair4_Front",
       "Hair1_Back_Elderly","Hair1_Front_Elderly","Hair2_Back_Elderly","Hair2_Front_Elderly",
       "Hair3_Back_Elderly","Hair3_Front_Elderly","Hair4_Back_Elderly","Hair4_Front_Elderly"];
-    if (sexo==="Male") lista.push("FacialHair1","FacialHair2","FacialHair3");
+    if (sexo==="Male") lista.push("FacialHair1","FacialHair2","FacialHair3","FacialHair1_Elderly","FacialHair2_Elderly","FacialHair3_Elderly");
     if (sexo==="Female") lista.push("Hair5_Back","Hair5_Front","Hair6_Back","Hair6_Front","Hair7_Back","Hair7_Front","Hair8_Back","Hair8_Front","Hair9_Back","Hair9_Front","Hair10_Back","Hair10_Front","Hair11_Back","Hair11_Front","Hair12_Back","Hair12_Front");
     if (sexo==="Female") lista.push("Hair5_Back_Elderly","Hair5_Front_Elderly","Hair6_Back_Elderly","Hair6_Front_Elderly","Hair7_Back_Elderly","Hair7_Front_Elderly","Hair8_Back_Elderly","Hair8_Front_Elderly","Hair9_Back_Elderly","Hair9_Front_Elderly","Hair10_Back_Elderly","Hair10_Front_Elderly","Hair11_Back_Elderly","Hair11_Front_Elderly","Hair12_Back_Elderly","Hair12_Front_Elderly");
     if (sexo==="Female") lista.push("Mouth_Sad","Mouth_Angry");
@@ -181,8 +181,9 @@ function componer(dest){
   // pelos grises v11 (gris TOTAL horneado en la capa). El tinte de pelo NO
   // se aplica al pelo anciano: va en (1,1,1), porque el tinte Silver no
   // funciona sobre el gris horneado (lo ensucia) y cualquier otro tinte lo
-  // recolorearía. El vello facial (solo hombre) no tiene versión anciana y
-  // sigue su capa normal con el tinte de pelo.
+  // recolorearía. El vello facial (solo hombre) también tiene versión
+  // anciana gris v11.1 (FacialHair<N>_Elderly) y sigue el mismo criterio:
+  // con Anciano va la capa _Elderly y el tinte en (1,1,1).
   const anc = R.edad===1;
   const suf = anc ? "_Elderly" : "";
   const tintePelo = anc ? [1,1,1] : cp;
@@ -192,7 +193,7 @@ function componer(dest){
   x.drawImage(teñida(imgs[S+"/"+ARCH.nariz(R.nariz)], piel),0,0);   // la nariz sigue la piel
   x.drawImage(ojosTeñidos(S+"/"+ARCH.ojos(R.ojos)),0,0);
   x.drawImage(imgs[S+"/"+ARCH.boca(R.boca,S)],0,0);
-  if (S==="Male" && R.vello>0) x.drawImage(teñida(imgs[S+"/FacialHair"+R.vello], cp),0,0);
+  if (S==="Male" && R.vello>0) x.drawImage(teñida(imgs[S+"/FacialHair"+R.vello+suf], tintePelo),0,0);
   x.drawImage(teñida(imgs[S+"/"+pelo+"_Front"+suf], tintePelo),0,0);
 }
 function codigo(){

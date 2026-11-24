@@ -1319,3 +1319,61 @@
   preexistente, a ojo iguales); las líneas de los hombros de la
   chaqueta del hombre no tienen pelo debajo (0 px) — pendiente de
   confirmación de Stiven.
+
+## 2026-11-24 — Barba gris anciana v11.1 [RAMA edad-ancianos, no subido aún]
+- Orden de Stiven 2026-11-24 ~15:19 («Sí, la barba gris también»):
+  con Anciano la barba quedaba oscura. Generadas las 3 capas
+  `FacialHair<N>_Elderly` con el método gris v11.1 adaptado
+  (`herramientas/vello_gris.py`, informe `informe_vello_v11.1.json`):
+  el Stubble SON puntos por diseño, así que solo se borraron los 6
+  puntos fuera de la silueta; el Mustache conserva su punta izquierda
+  (402 px) y se borraron 17 motas; la Full Beard conserva su masa
+  aunque salga de la silueta (cuelga bajo la mandíbula por diseño).
+  FH1: 19→2 componentes, 0 motas; FH2: 104→55 componentes, 0 polvo
+  aislado; FH3: 39→16 componentes. Integrado en web (precargar +
+  componer, verificado en navegador: AGE Elderly, FACIAL HAIR Full
+  Beard, 0 errores) y motor (mismo criterio que el pelo: capa
+  _Elderly + tinte en (1,1,1)); Unity: `PortraitData.
+  facialHairsElderly` + `PortraitView.SetFacialHair` / `SetHairColor`
+  (blanco con Anciano, fallback a la joven). Los renders jóvenes son
+  idénticos a antes (diff máx. 0.0 en 3 combos). PENDIENTE: veredicto
+  de Stiven sobre la muestra y subir el commit a la rama.
+
+## 2026-11-24 — Correcciones a la barba gris (marcas de Stiven) [RAMA edad-ancianos, no subido aún]
+- Stiven marcó 2 cosas en la muestra de la barba gris (~15:31):
+  (1) la barba se pasó un poquito de crecida; (2) un pedacito de
+  cuello se sale en el cuello de la camisa (O3).
+- (1) Causa: la barba JOVEN sale 35-71 px por delante de la barbilla
+  (en negro no se nota contra el fondo oscuro; el gris lo revela).
+  Arreglo DINÁMICO en el método (`herramientas/vello_gris.py`,
+  paso `borde_frente_barba` al final del proceso): recorta el borde
+  frontal de FH3_Elderly siguiendo la curva de la barbilla con 12 px
+  de margen + bigote hasta el borde de la cara + transición suave
+  (y921-960) hasta el borde natural de la punta. 4.264 px sólidos
+  recortados; FH3 nuevo md5 `3f85941fea8b`. Lecciones: recortar hasta
+  la línea del CUELLO borraba toda la punta (17.161 px); la barbilla
+  suavizada mezcla el cuello en y925 y dejaba una muesca — el ancla
+  de la transición es jaw[920]; el recorte va DESPUÉS de la limpieza
+  (antes, B/D borraban las hebras del borde nuevo). La barba joven
+  NO se toca (queda igual que siempre).
+- (1b) Stiven marcó después la PUNTA de abajo (~15:51): el recorte
+  del frente dejó al descubierto que la barba cuelga 88 px por
+  debajo del mentón (hasta y1011) delante del cuello. Arreglo con SU
+  método: referencia del mismo personaje SIN barba (FH0) — el mentón
+  termina en y923 (el borde de la Base salta de x405 a x500 ahí) y la
+  línea de la mandíbula sube a la oreja. Paso
+  `borde_inferior_barba` (al final del proceso): recorta la barba por
+  debajo de esa línea (curva por (405,923), (550,878), (700,832)).
+  52.047 px sólidos recortados; la barba termina en y923, sigue la
+  mandíbula, sin faldón ni escalón. Lección: el primer intento (v6)
+  dejó un escalón plano en y899 porque el bucle empezaba en y900 —
+  el corte debe empezar por encima de la línea (y800). Verificado en
+  O1/O2/O3 ancianos con FH3; el joven no cambia.
+- (2) Causa: cuña de piel de 162 px en (860-876, 938-959) que se
+  asoma por encima del borde del cuello de la camisa O3 (defecto del
+  arte joven, idéntico en joven y anciano). Arreglo:
+  `herramientas/arreglar_cuello_o3.py` extiende el cuello de la
+  camisa O3 sobre la cuña (color copiado de la chaqueta + ribete
+  oscuro por el borde nuevo). Solo O3 en la copia de la rama; la
+  Base no se toca. Verificado: el render joven O3 solo cambia 211 px
+  en la cuña; O1/O2 ancianos con FH3 se ven limpios.

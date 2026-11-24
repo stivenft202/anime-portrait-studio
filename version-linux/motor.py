@@ -149,9 +149,9 @@ def render(receta, fondo=(40, 44, 52)):
     por defecto 0, así las recetas viejas siguen funcionando). Con Anciano
     se usan la Base anciana v9 y los pelos grises v11 (gris TOTAL horneado
     en la capa, tinte de pelo anulado a (1,1,1): el tinte Silver no funciona
-    sobre el gris horneado). El vello facial no tiene versión anciana y
-    sigue su capa normal con el tinte de pelo. Mismo criterio que el
-    navegador (index.html) y que Unity (PortraitRecipe.ageIndex)."""
+    sobre el gris horneado). El vello facial también tiene versión anciana
+    gris v11.1 (FacialHair<N>_Elderly, tinte anulado igual). Mismo criterio
+    que el navegador (index.html) y que Unity (PortraitRecipe.ageIndex)."""
     sexo = receta['sexo']
     pelo = PELOS[sexo][receta['pelo']][1]
     edad = receta.get('edad', 0)
@@ -168,7 +168,7 @@ def render(receta, fondo=(40, 44, 52)):
     comp = _sobre(comp, _ojos_tinte(capa(sexo, ojos_arch), ojos_arch, receta.get('color_ojos', 0), sexo))
     comp = _sobre(comp, capa(sexo, BOCAS[sexo][receta['boca']][1]))
     if sexo == 'Male' and receta.get('vello', 0) > 0:
-        comp = _sobre(comp, _tinte(capa(sexo, VELLO[receta['vello']][1]), COLORES_PELO[receta['color_pelo']][1]))
+        comp = _sobre(comp, _tinte(capa(sexo, VELLO[receta['vello']][1] + suf), tinte_pelo))
     comp = _sobre(comp, _tinte(capa(sexo, pelo + '_Front' + suf), tinte_pelo))
     return comp
 
