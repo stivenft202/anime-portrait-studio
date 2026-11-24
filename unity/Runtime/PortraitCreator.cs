@@ -14,7 +14,11 @@ namespace PortraitKit
     /// - Every category (hair, outfit, eyes, eye color, nose, mouth,
     ///   facial hair, hair color, skin tone, outfit color) has a &lt; and
     ///   &gt; button: one click per step,
-    ///   and the portrait updates instantly.
+    ///   and the portrait updates instantly. The four color categories
+    ///   (eye color, hair color, skin tone, outfit color) also have a row
+    ///   of clickable color swatches right under their row, so a color
+    ///   can be picked in one click; the selected swatch gets a white
+    ///   border.
     /// - "Randomize" (or Space) builds a whole new look at once.
     /// - "Export PNG" saves the full 1200x1600 portrait with transparency;
     ///   "Export Face PNG" saves the top 1200x1200 square.
@@ -85,6 +89,12 @@ namespace PortraitKit
         Text[] rowValueTexts;
         Text statusText;
         Text comboText;
+
+        // One white-border Outline per color swatch, indexed by
+        // [category][color index]; only the four color categories have
+        // entries, the rest stay null. RefreshUI enables exactly the
+        // outline of the currently selected color.
+        Outline[][] swatchOutlines;
 
         // Category ids, in panel order.
         const int CatHair = 0, CatOutfit = 1, CatEyes = 2, CatEyeColor = 3, CatNose = 4, CatMouth = 5,
@@ -191,6 +201,35 @@ namespace PortraitKit
             lastWasRandom = false;
             ApplyCurrent();
             RefreshUI();
+        }
+
+        /// <summary>Picks one color directly (used by the swatch row).</summary>
+        public void SelectColor(int category, int index)
+        {
+            int count = CategoryCount(category);
+            if (count <= 0)
+                return;
+            SetCategoryValue(category, Mathf.Clamp(index, 0, count - 1));
+            lastWasRandom = false;
+            ApplyCurrent();
+            RefreshUI();
+        }
+
+        /// <summary>The palette list behind a color category, or null for
+        /// the piece categories (hair, outfit, eyes, nose, mouth, facial
+        /// hair), which have no colors to show as swatches.</summary>
+        NamedColor[] PaletteColors(int category)
+        {
+            if (palette == null)
+                return null;
+            switch (category)
+            {
+                case CatEyeColor: return palette.eyeColors;
+                case CatHairColor: return palette.hairColors;
+                case CatSkinTone: return palette.skinTones;
+                case CatOutfitColor: return palette.outfitColors;
+                default: return null;
+            }
         }
 
         public void NextHair() { Cycle(CatHair, 1); }
@@ -528,28 +567,56 @@ namespace PortraitKit
                 }
             }
 
-            // Category rows.
+            // Category rows. The four color categories (eye color, hair
+            // color, skin tone, outfit color) get a row of clickable
+            // color swatches right under their row, so a color can be
+            // picked in one click instead of stepping through the list
+            // with < and >. The rows are a little shorter than before so
+            // the four swatch rows fit above the action buttons.
             rowValueTexts = new Text[CatCount];
+            swatchOutlines = new Outline[CatCount][];
+            float rowTop = 0.868f;
             for (int c = 0; c < CatCount; c++)
             {
                 int captured = c;
-                float top = 0.862f - c * 0.052f;
-                float bottom = top - 0.044f;
+                float top = rowTop;
+                float bottom = top - 0.038f;
                 var label = MakeText(panel, CategoryLabels[c], 0.04f, bottom, 0.30f, top, 17, TextAnchor.MiddleLeft);
                 label.color = new Color(0.75f, 0.78f, 0.82f);
                 MakeButton(panel, "<", 0.315f, bottom, 0.415f, top, () => Cycle(captured, -1));
                 rowValueTexts[c] = MakeText(panel, "-", 0.43f, bottom, 0.845f, top, 20, TextAnchor.MiddleCenter);
                 MakeButton(panel, ">", 0.86f, bottom, 0.96f, top, () => Cycle(captured, 1));
+                rowTop = bottom - 0.006f;
+
+                var colors = PaletteColors(c);
+                if (colors != null && colors.Length > 0)
+                {
+                    float swatchTop = rowTop;
+                    float swatchBottom = swatchTop - 0.026f;
+                    swatchOutlines[c] = new Outline[colors.Length];
+                    float gap = 0.004f;
+                    float w = (0.92f - gap * (colors.Length - 1)) / colors.Length;
+                    for (int i = 0; i < colors.Length; i++)
+                    {
+                        int capturedIndex = i;
+                        float x0 = 0.04f + i * (w + gap);
+                        swatchOutlines[c][i] = MakeSwatch(panel, colors[i].color,
+                            x0, swatchBottom, x0 + w, swatchTop,
+                            () => SelectColor(captured, capturedIndex));
+                    }
+                    rowTop = swatchBottom - 0.006f;
+                }
             }
 
             // Action buttons.
             string[] actions = { "Randomize", "Export PNG", "Export Face PNG", "Save Recipe", "Load Recipe" };
             UnityEngine.Events.UnityAction[] handlers =
                 { Randomize, ExportPng, ExportFacePng, SaveRecipe, LoadRecipe };
+            float actionTop = rowTop - 0.006f;
             for (int i = 0; i < actions.Length; i++)
             {
-                float top = 0.322f - i * 0.052f;
-                MakeButton(panel, actions[i], 0.04f, top - 0.044f, 0.96f, top, handlers[i]);
+                float top = actionTop - i * 0.048f;
+                MakeButton(panel, actions[i], 0.04f, top - 0.042f, 0.96f, top, handlers[i]);
             }
 
             // Combo code line at the bottom of the panel: the exact
@@ -572,6 +639,21 @@ namespace PortraitKit
             for (int c = 0; c < CatCount; c++)
                 if (rowValueTexts[c] != null)
                     rowValueTexts[c].text = CategoryName(c);
+            // The selected swatch of each color row gets a white border;
+            // every other swatch has its border disabled.
+            if (swatchOutlines != null)
+            {
+                for (int c = 0; c < CatCount; c++)
+                {
+                    var outlines = swatchOutlines[c];
+                    if (outlines == null)
+                        continue;
+                    int selected = CategoryValue(c);
+                    for (int i = 0; i < outlines.Length; i++)
+                        if (outlines[i] != null)
+                            outlines[i].enabled = (i == selected);
+                }
+            }
             if (statusText != null)
                 statusText.text = status;
             if (comboText != null)
@@ -616,6 +698,29 @@ namespace PortraitKit
             button.onClick.AddListener(onClick);
             var text = MakeText(rect, label, 0f, 0f, 1f, 1f, 22, TextAnchor.MiddleCenter);
             text.raycastTarget = false;
+            return;
+        }
+
+        /// <summary>One clickable color square. The button has no color
+        /// transition, so the square always shows the exact palette color;
+        /// the returned Outline (white border, starts disabled) marks the
+        /// currently selected color and is toggled by RefreshUI.</summary>
+        static Outline MakeSwatch(Transform parent, Color color, float x0, float y0, float x1, float y1,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            var rect = MakeRect(parent, x0, y0, x1, y1);
+            rect.gameObject.name = "Swatch";
+            var image = rect.gameObject.AddComponent<Image>();
+            image.color = color;
+            var button = rect.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(onClick);
+            var outline = rect.gameObject.AddComponent<Outline>();
+            outline.effectColor = Color.white;
+            outline.effectDistance = new Vector2(2f, -2f);
+            outline.enabled = false;
+            return outline;
         }
     }
 }
