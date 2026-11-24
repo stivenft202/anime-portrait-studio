@@ -25,8 +25,17 @@ Método (en orden, por capa):
      la curva superior de CADA ceja (Eyes_Neutral, solo columnas con ceja
      real — sin extrapolar más allá de sus extremos, que es lo que en v9
      cortó la hebra de la sien F); corte = top_ceja - 14 px, caída suave
-     de 8 px; los intervalos separados que tocan la banda de la ceja se
-     borran con borde afilado (sin muro vertical).
+     de 8 px. REGLA v11.1 (Fase 4, ciclo 1): el recorte con rampa se aplica
+     a TODO intervalo que NAZCA por encima de la línea de corte (es
+     flequillo/masa, aunque el cierre lo haya partido en dos por una
+     rendija del arte); el borrado ENTERO solo se aplica a intervalos que
+     nacen EN o BAJO la línea y tocan la banda (hebra suelta colgando
+     sobre la ceja). La v11 borraba entero cualquier intervalo separado
+     que tocara la banda, y cuando el primer intervalo era una astilla
+     de 1-2 px y el segundo era la masa entera, borraba LA MASA y dejaba
+     una RANURA vertical de piel en el flequillo (F H8, H9 y H10 en el
+     vídeo del ciclo 1; H10: 12.043 px). La rampa deja la ceja igual de
+     despejada: todo lo que queda bajo la línea se pone a 0.
   E. Oreja (solo Front): ningún componente desconectado dentro de la zona
      de la oreja (caja derivada del contorno oscuro de la Base) + limpieza
      del polvo antialiased dentro de la caja.
@@ -53,14 +62,19 @@ con el inventario + la inspección visual del render joven) y es lo único
 por peinado; las reglas son las mismas para los 16.
 
 Entrada: version-linux/assets/{Female,Male}/Hair{N}_{Front,Back}.png
-Salida: {Sexo}_Hair{N}_{Front,Back}_canas_v11.png (+ informe JSON).
-No toca version-linux/assets/ ni las v9/v10. No sube nada.
+Salida: {Sexo}_Hair{N}_{Front,Back}_canas_v11_1.png (+ informe JSON).
+No toca version-linux/assets/ ni las v9/v10/v11. No sube nada.
 Uso: python3 pelo_gris_dinamico.py
+
+v11.1 (2026-11-24, Fase 4 ciclo 1): corrección del paso D (ver arriba).
+Re-aplicado a los 16 peinados; las capas que no cambian conservan su md5 v11.
 """
 import os, sys, json, hashlib, zlib
 import numpy as np
 from PIL import Image
 from scipy import ndimage
+
+VERSION = 'v11_3'  # sufijo de salida: *_canas_v11_3.png, informe_v11_3.json
 
 EDAD = os.path.dirname(os.path.abspath(__file__))
 PROYECTO = os.path.dirname(os.path.dirname(EDAD))
@@ -672,12 +686,19 @@ def intervalos_cerrados(col):
     return out
 
 def paso_ceja(a, sexo, informe):
-    """Despeje de la ceja (solo Front). Igual que v9: recorte del flequillo
-    por encima de la curva de cada ceja (corte = top - 14 px, con rampa de
-    8 px) e intervalos separados que toquen la banda se borran enteros.
-    El muro vertical que queda en el extremo de la ceja lo redondea el
-    paso G (sien); aquí NO se suaviza la máscara (el desenfoque dejaba
-    pelo atenuado bajo la línea de corte)."""
+    """Despeje de la ceja (solo Front). Recorte del flequillo por encima de
+    la curva de cada ceja (corte = top - 14 px, con rampa de 8 px).
+    REGLA v11.1: la rampa se aplica a TODO intervalo que NAZCA por encima
+    de la línea de corte (es flequillo/masa, aunque el cierre lo haya
+    partido en dos por una rendija del arte: en v11 el primer intervalo
+    era a veces una astilla de 1-2 px y el segundo la masa entera, y el
+    borrado entero de ese segundo intervalo dejaba una ranura vertical
+    de piel en el flequillo — F H8, H9, H10 en el vídeo del ciclo 1).
+    El borrado ENTERO solo se aplica a intervalos que nacen EN o BAJO la
+    línea y tocan la banda (hebra suelta colgando sobre la ceja, el caso
+    v9). La ceja queda igual de despejada: la rampa pone a 0 todo lo que
+    queda bajo la línea. El muro vertical que queda en el extremo de la
+    ceja lo redondea el paso G (sien); aquí NO se suaviza la máscara."""
     if informe.get('parte') != 'Front':
         return 0
     alpha = a[..., 3]
@@ -690,15 +711,20 @@ def paso_ceja(a, sexo, informe):
             ivs = intervalos_cerrados(col)
             if not ivs:
                 continue
-            a0, b0 = ivs[0]
-            if b0 > corte - 6:
-                ys = np.arange(max(0, int(corte) - 10), min(700, b0 + 1))
-                factor = np.clip((corte + 2 - ys) / 8.0, 0, 1)
-                antes = a[ys, x, 3].copy()
-                a[ys, x, 3] = antes * factor
-                n_total += int(((antes > 0) & (a[ys, x, 3] == 0)).sum())
-            for (a1, b1) in ivs[1:]:
-                if a1 <= yb and b1 >= corte - 6:
+            for (a1, b1) in ivs:
+                if a1 < corte - 6:
+                    # Nace por encima de la línea: es flequillo/masa.
+                    # Rampa (nunca borrado entero); si no llega a la
+                    # línea no se toca.
+                    if b1 > corte - 6:
+                        ys = np.arange(max(0, int(corte) - 10), min(700, b1 + 1))
+                        factor = np.clip((corte + 2 - ys) / 8.0, 0, 1)
+                        antes = a[ys, x, 3].copy()
+                        a[ys, x, 3] = antes * factor
+                        n_total += int(((antes > 0) & (a[ys, x, 3] == 0)).sum())
+                elif a1 <= yb and b1 >= corte - 6:
+                    # Nace en/bajo la línea y toca la banda: hebra suelta
+                    # sobre la ceja -> se borra entera (caso v9).
                     a[a1:b1 + 1, x, 3] = 0
                     n_total += (b1 - a1 + 1)
     informe['ceja_px_borrados'] = n_total
@@ -922,9 +948,13 @@ def paso_polvo(a, informe):
     """Polvo aislado: racimos de alfa 20-200 a >3 px del sólido con n<100
     se borran; los racimos grandes (>=100 px) son el borde suave / sombra
     del pelo y se conservan y se listan. PERO: un racimo AISLADO (>10 px
-    del sólido) con alfa mediano >=80 es visible en gris (un hilo o una
+    del sólido) con alfa mediano >=40 es visible en gris (un hilo o una
     mancha) y se borra; y en la ventana de la ceja se borra TODO el polvo
-    aislado (ningún pelo sobre la ceja, aunque sea tenue)."""
+    aislado (ningún pelo sobre la ceja, aunque sea tenue).
+    v11.2 (2026-11-24): el umbral era 80; el velo de H9 (2 racimos tenues
+    alfa 44 y 63, invisibles en fondo oscuro, visibles en fondo claro)
+    quedaba conservado. Con 40 se borran. En el informe v11.1 SOLO H9
+    Front tenía tenues, así que el cambio no afecta a las demás capas."""
     solido = a[..., 3] > 200
     cerca = ndimage.binary_dilation(solido, iterations=3)
     polvo = (a[..., 3] >= 20) & (a[..., 3] <= 200) & ~cerca
@@ -973,7 +1003,7 @@ def paso_polvo(a, informe):
         en_ceja = ven_ceja is not None and \
             s[1].start >= ven_ceja[0] and s[1].stop - 1 <= ven_ceja[2] and \
             s[0].start >= ven_ceja[1] and s[0].stop - 1 <= ven_ceja[3]
-        if en_ceja or alfa_med >= 80:
+        if en_ceja or alfa_med >= 40:
             m = ndimage.binary_dilation(lab2 == i, iterations=2)
             a[m, 3] = 0
             borrados_ais.append(dict(n=n_orig, alfa_med=round(alfa_med),
@@ -987,6 +1017,175 @@ def paso_polvo(a, informe):
     informe['polvo_aislado_borrado'] = borrados_ais
     informe['polvo_tenue_conservado'] = tenues
     return borrados
+
+# ------------------------------------------------------------------ paso K (v11.3)
+def barbilla_y(sexo):
+    """Y de la barbilla (mentón) medida en la Base joven: la fila donde el
+    ancho de la piel cae de golpe (la cara termina, empieza el cuello).
+    La Base anciana v9 tiene la misma geometría, así que vale la joven."""
+    ruta = os.path.join(ASSETS, sexo, 'Base.png')
+    b = np.asarray(Image.open(ruta).convert('RGBA')).astype(float)
+    anchos, xs_min = [], []
+    for y in range(600, 1001, 5):
+        xs = np.where(b[y, :, 3] > 200)[0]
+        if len(xs):
+            anchos.append(int(xs.max() - xs.min() + 1))
+            xs_min.append(int(xs.min()))
+        else:
+            anchos.append(0)
+            xs_min.append(0)
+    # la mayor caída de ancho entre dos muestras consecutivas (y850-980)
+    mejor_y, mejor_caida = 920, 0
+    for i in range(1, len(anchos)):
+        y = 600 + i * 5
+        if 850 <= y <= 980:
+            caida = anchos[i - 1] - anchos[i]
+            if caida > mejor_caida:
+                mejor_caida, mejor_y = caida, y
+    return mejor_y
+
+def banda_cuello(sexo, y_chin):
+    """Banda x del cuello/pecho a la altura de la barbilla, de la Base:
+    el rango x de la piel en y_chin, ensanchado 150 px a cada lado.
+    Debajo de la barbilla, las hebras finas DENTRO de esta banda caen sobre
+    cuello/pecho (son trazos sueltos); fuera de ella está la masa del pelo
+    largo (borde de diseño, no se toca)."""
+    ruta = os.path.join(ASSETS, sexo, 'Base.png')
+    b = np.asarray(Image.open(ruta).convert('RGBA')).astype(float)
+    xs = np.where(b[y_chin, :, 3] > 200)[0]
+    if len(xs) == 0:
+        return (400, 1000)
+    x0 = max(0, int(xs.min()) - 150)
+    x1 = min(1200, int(xs.max()) + 150)
+    return (x0, x1)
+
+def paso_dedos_sueltos(a, clave, informe):
+    """v11.3 (2026-11-24): dedos finos sueltos que el gris revela y los
+    pasos B/C/H no cazan porque están CONECTADOS a la masa (no son
+    componentes sueltos ni polvo aislado).
+    - K1 protuberancias del borde suave: el borde exterior (alfa>0) del pelo
+      sigue su tendencia local (mediana 31 filas); una protuberancia
+      semitransparente que sale >3 px de la tendencia es un trazo sobrante
+      (G3: el borde del mechón corto sale 7 px en y959-967). Solo se recorta
+      lo SEMI (alfa 20-200), nunca lo sólido: el diseño no se toca.
+    - K2 dedos sólidos bajo la barbilla: hebras finas (apertura r=2 las
+      borra) que se alejan >10 px de la masa y caen dentro de la banda del
+      cuello/pecho (G4: hebra punteada sobre el cuello; G5: líneas sobre el
+      hombro). Fuera de la banda está el borde del pelo largo (diseño).
+      Se borra el dedo y el semi a 2 px alrededor (la parte punteada tenue).
+    Solo Front (el Back es la masa trasera, otra geometría)."""
+    if informe.get('parte') != 'Front':
+        return 0
+    H, W = a.shape[:2]
+    alfa = a[..., 3]
+    borrados_k1, borrados_k2 = [], []
+    # --- K1: protuberancias del borde suave (semi) ---
+    left = np.full(H, float(W))
+    right = np.full(H, -1.0)
+    for y in range(H):
+        xs = np.where(alfa[y] > 0)[0]
+        if len(xs):
+            left[y] = xs.min()
+            right[y] = xs.max()
+    left_med = ndimage.median_filter(left, size=31, mode='nearest')
+    right_med = ndimage.median_filter(right, size=31, mode='nearest')
+    for lado in ('izq', 'der'):
+        if lado == 'izq':
+            bump = (left < left_med - 3) & (left < W)
+        else:
+            bump = (right > right_med + 3) & (right >= 0)
+        ys = np.where(bump)[0]
+        # grupos de filas contiguas (una protuberancia)
+        grupos = []
+        if len(ys):
+            s = ys[0]
+            p = ys[0]
+            for y in ys[1:]:
+                if y == p + 1:
+                    p = y
+                else:
+                    grupos.append((s, p))
+                    s = y
+                    p = y
+            grupos.append((s, p))
+        for (y0, y1) in grupos:
+            if y1 - y0 + 1 > 15:
+                continue  # protuberancia ancha: forma del peinado, no trazo
+            n_antes = 0
+            for y in range(y0, y1 + 1):
+                if lado == 'izq':
+                    lim = int(left_med[y])
+                    m = (np.arange(W) < lim) & (alfa[y] >= 20) & (alfa[y] <= 200)
+                else:
+                    lim = int(right_med[y])
+                    m = (np.arange(W) > lim) & (alfa[y] >= 20) & (alfa[y] <= 200)
+                n_antes += int(m.sum())
+                a[y, m, 3] = 0
+            if n_antes:
+                borrados_k1.append(dict(lado=lado, y0=int(y0), y1=int(y1),
+                                        px=int(n_antes)))
+    # --- K2: dedos sólidos finos bajo la barbilla, en la banda del cuello ---
+    y_chin = barbilla_y(informe['sexo'])
+    xb0, xb1 = banda_cuello(informe['sexo'], y_chin)
+    informe['k_barbilla_y'] = int(y_chin)
+    informe['k_banda_cuello'] = [int(xb0), int(xb1)]
+    sol = alfa > 200
+    ero = ndimage.binary_erosion(sol, iterations=2)
+    abierto = ndimage.binary_dilation(ero, iterations=2)
+    removido = sol & ~abierto
+    dist_ab = ndimage.distance_transform_edt(~abierto)
+    lab, n = ndimage.label(removido)
+    sizes = np.bincount(lab.ravel())
+    for i in range(1, n + 1):
+        if sizes[i] < 15:
+            continue
+        ys, xs = np.where(lab == i)
+        if ys.min() <= y_chin:
+            continue  # por encima de la barbilla: flequillo/mechones de diseño
+        if dist_ab[lab == i].max() <= 10:
+            continue  # pegado a la masa: borde, no dedo
+        xc = float(xs.mean())
+        if not (xb0 <= xc <= xb1):
+            continue  # fuera de la banda del cuello: borde del pelo largo
+        m = lab == i
+        n_sol = int(m.sum())
+        # semi a 2 px alrededor (la parte punteada tenue del mismo dedo)
+        dil = ndimage.binary_dilation(m, iterations=2)
+        m_semi = dil & (alfa >= 20) & (alfa <= 200)
+        n_semi = int(m_semi.sum())
+        # --- SALVAGUARDA DE PUENTE: un "dedo" fino puede ser el puente que
+        # une un trozo GRUESO de pelo a la masa; borrarlo soltaría ese trozo
+        # y se perdería pelo de diseño. Pero si el trozo desprendido es un
+        # HILO fino (ancho_med<=6, largo>30, el mismo criterio del barrido
+        # final), entonces puente+trozo son UNA hebra suelta: se borra el
+        # puente y el barrido final se lleva el hilo. Solo se conserva el
+        # puente si suelta un trozo GRUESO (ancho_med>6, masa de diseño).
+        alfa_guarda = a[..., 3].copy()
+        a[m, 3] = 0
+        a[m_semi, 3] = 0
+        sol2 = a[..., 3] > 200
+        comps2, _ = componentes(sol2)
+        grueso = [c for c in comps2[1:] if c['ancho_med'] > 6.0]
+        if grueso:
+            a[..., 3] = alfa_guarda  # restaura: era puente a masa gruesa
+            informe.setdefault('k2_puentes_conservados', []).append(
+                dict(n_sol=n_sol, x0=int(xs.min()), x1=int(xs.max()),
+                     y0=int(ys.min()), y1=int(ys.max()),
+                     desprendido=[dict(n=c['n'], ancho_med=round(c['ancho_med'], 1),
+                                       x0=c['x0'], x1=c['x1'],
+                                       y0=c['y0'], y1=c['y1'])
+                                  for c in grueso]))
+            continue
+        borrados_k2.append(dict(n_sol=n_sol, n_semi=n_semi,
+                                x0=int(xs.min()), x1=int(xs.max()),
+                                y0=int(ys.min()), y1=int(ys.max()),
+                                dist_max=round(float(dist_ab[lab == i].max()))))
+    informe['k1_protuberancias'] = borrados_k1
+    informe['k2_dedos'] = borrados_k2
+    print(f'    K dedos sueltos: K1 {len(borrados_k1)} protuberancias '
+          f'({sum(b["px"] for b in borrados_k1)}px semi), K2 {len(borrados_k2)} '
+          f'dedos, barbilla y={y_chin}, banda x{xb0}-{xb1}', flush=True)
+    return len(borrados_k1) + len(borrados_k2)
 
 # ------------------------------------------------------------------ proceso
 def procesar_capa(sexo, h, parte, informe_global):
@@ -1090,6 +1289,12 @@ def procesar_capa(sexo, h, parte, informe_global):
     # H. polvo
     paso_polvo(a, informe)
 
+    # K. dedos sueltos (v11.3): trazos finos conectados a la masa que el
+    # gris revela (G3/G4/G5 de H9). Después del polvo y antes del barrido
+    # final, para que el barrido limpie los restos del corte.
+    paso_dedos_sueltos(a, clave, informe)
+    diff('K-dedos')
+
     # I. barrido final de fragmentos: los cortes C-H pueden haber cercenado
     # trozos de la masa que quedan como hilos finos desconectados.
     n_frag = barrer_fragmentos(a, clave, informe, 'I-final')
@@ -1128,7 +1333,7 @@ def procesar_capa(sexo, h, parte, informe_global):
     informe['alfa_sube_px'] = int((a[..., 3] > alfa_orig).sum())
     # RGB: el gris cambia el RGB (remap + streamlines); el alfa es lo que
     # se verifica contra el original en los pasos de limpieza
-    out = os.path.join(EDAD, f'{nombre}_canas_v11.png')
+    out = os.path.join(EDAD, f'{nombre}_canas_{VERSION}.png')
     Image.fromarray(np.clip(a, 0, 255).astype('uint8')).save(out)
     md5 = hashlib.md5(open(out, 'rb').read()).hexdigest()
     informe['md5'] = md5
@@ -1144,9 +1349,9 @@ def main():
             for parte in ['Front', 'Back']:
                 inf = procesar_capa(sexo, h, parte, informe_global)
                 informe_global[f'{sexo}_Hair{h}_{parte}'] = inf
-    with open(os.path.join(EDAD, 'informe_v11.json'), 'w') as f:
+    with open(os.path.join(EDAD, f'informe_{VERSION}.json'), 'w') as f:
         json.dump(informe_global, f, indent=1)
-    print('informe guardado en informe_v11.json')
+    print(f'informe guardado en informe_{VERSION}.json')
     # resumen
     n_ok = n_vacias = 0
     for k, v in informe_global.items():

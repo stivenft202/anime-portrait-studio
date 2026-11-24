@@ -1377,3 +1377,55 @@
   oscuro por el borde nuevo). Solo O3 en la copia de la rama; la
   Base no se toca. Verificado: el render joven O3 solo cambia 211 px
   en la cuña; O1/O2 ancianos con FH3 se ven limpios.
+
+## 2026-11-24 — Velo de H9 anciano (método v11.2) [RAMA edad-ancianos, no subido aún]
+- En fondo claro, la H9 anciana (Hime Cut) mostraba un velo gris tenue
+  junto al pelo: 2 racimos de polvo aislado conservados por el umbral
+  alfa>=80 del paso H (`paso_polvo`): n=447 alfa med 44 (x491-573,
+  y1325-1487, 154 px del sólido, abajo del pelo largo) y n=49 alfa med
+  63 (x264-275, y480-525). En fondo oscuro invisibles; en fondo claro
+  se ven como mancha fantasma.
+- Arreglo EN EL MÉTODO (v11.2, `herramientas/pelo_gris_dinamico.py`):
+  umbral de polvo aislado visible 80 -> 40. En el informe v11.1 SOLO
+  H9 Front tenía tenues, así que el cambio no afecta a las demás capas
+  (solo se regeneró H9 Front; las otras 25 quedan v11.1 hasta el
+  próximo re-run completo).
+- Verificado: masa sólida idéntica (519.313 px, diff 0); el único
+  cambio de alfa son los 2 racimos (639 px); el render en fondo claro
+  cambia exactamente 3.530 px (igual que la capa); el velo punteado
+  sobre la chaqueta desaparece (zoom `muestra/zoom_velo_H9_v112.png`).
+  Nueva capa `Female/Hair9_Front_Elderly.png` md5
+  a922ae5cbd43da435c83fbf3c609be8d.
+
+## 2026-11-24 — Trazos sobrantes de H9 anciana (método v11.3) [RAMA edad-ancianos, no subido aún]
+- Stiven marcó 5 trazos en la H9 anciana (Hime Cut) en fondo claro.
+  G1 (oreja) y G2 (punta de la nariz) son ANATOMÍA DE LA BASE, no pelo:
+  la Base anciana v9 y la Base joven son idénticas en esas zonas (la
+  oreja es el pliegue de la oreja, la nariz su sombreado; el gris las hace
+  más visibles por contraste). NO se tocan sin su orden; queda como
+  pregunta pendiente.
+- G3/G4/G5 son PELO (capa `Female/Hair9_Front_Elderly.png`) y se arreglan
+  EN EL MÉTODO (v11.3, `herramientas/pelo_gris_dinamico.py`, paso K
+  `paso_dedos_sueltos`, tras el polvo y antes del barrido final):
+  - K1 protuberancias del borde suave: el borde exterior sigue su
+    tendencia local (mediana 31 filas); una protuberancia SEMI que sale
+    >3 px es un trazo sobrante. Solo se recorta lo semi, nunca lo sólido.
+    Caza G3 (borde del mechón corto, y959-967, 29 px semi).
+  - K2 dedos sólidos bajo la barbilla: hebras finas (la apertura r=2 las
+    borra) que se alejan >10 px de la masa y caen en la banda del
+    cuello/pecho (de la Base: barbilla y=920, banda x398-996). Se borra el
+    dedo y el semi a 2 px alrededor. Salvaguarda de puente: si borrar el
+    dedo suelta un trozo GRUESO (ancho_med>6, masa de diseño) no se borra;
+    si suelta un HILO fino (ancho_med<=6, largo>30) se borra puente+hilo.
+    Caza G4 (hebra punteada del cuello + puntas sueltas) y G5 (2 líneas
+    sobre el hombro + barra gris). Los 6 dedos + 4 hilos desprendidos
+    (1511, 930, 380, 202 px) + 1 mota se borran; el borde del pelo largo
+    (izq., x319-345) queda intacto por la banda.
+- Verificado: masa principal 1 componente (intacta); sólido 519.313 ->
+  515.621 px (-3.692 = 6 dedos + 4 hilos + 1 mota); 0 motas; 0 tenues;
+  alfa solo baja; el render joven es IDÉNTICO (0 px, regresión 0); el
+  render anciano en fondo claro cambia solo en las 3 zonas marcadas
+  (diff>20 en x314-774, y959-1370); G3/G4/G5 verificados a ojo en zooms
+  (comparaciones `muestra/comp_v112_v113_G3/G4/G5.png`).
+  Nueva capa `Female/Hair9_Front_Elderly.png` md5
+  a3ff22966242131a2e63ef8f4a8d8f9a.
